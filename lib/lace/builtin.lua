@@ -15,6 +15,30 @@ local function compiler()
    return require "lace.compiler"
 end
 
+local function run_conditions(exec_context, cond)
+   for i = 1, #cond do
+      local name = cond[i]
+      local invert = false
+      if name:sub(1,1) == "!" then
+	 invert = true
+	 name = name:sub(2)
+      end
+      local res, msg = engine.test(exec_context, name)
+      if res == nil then
+	 return nil, msg
+      end
+      if invert then
+	 res = not res
+      end
+      if not res then
+	 -- condition failed
+	 return false
+      end
+   end
+   -- conditions passed
+   return true
+end
+
 --[ Allow and Deny ]------------------------------------------------
 
 local unconditional_result, last_result
@@ -32,24 +56,13 @@ local function get_set_last_result(newv)
 end
 
 local function _do_return(exec_context, result, reason, cond)
-   for i = 1, #cond do
-      local name = cond[i]
-      local invert = false
-      if name:sub(1,1) == "!" then
-	 invert = true
-	 name = name:sub(2)
-      end
-      local res, msg = engine.test(exec_context, name)
-      if res == nil then
-	 return nil, msg
-      end
-      if invert then
-	 res = not res
-      end
-      if not res then
-	 -- condition failed, return true to continue execution
-	 return true
-      end
+   local pass, msg = run_conditions(exec_context, cond)
+   if pass == nil then
+      -- Pass errors
+      return nil, msg
+   elseif pass == false then
+      -- Conditions failed, return true to continue execution
+      return true
    end
    return result, reason
 end
@@ -152,6 +165,63 @@ function builtin.define(compcontext, define, name, controltype, ...)
 end
 
 builtin.def = builtin.define
+
+--[ Inclusion of rulesets ]-------------------------------------------
+
+local function _do_include(exec_context, ruleset, conds)
+   local pass, msg = run_conditions(exec_context, conds)
+   if pass == nil then
+      -- Pass errors
+      return nil, msg
+   elseif pass == false then
+      -- Conditions failed, return true to continue execution
+      return true
+   end
+   -- Essentially we run the ruleset and return its values
+   local result, msg = engine.internal_run(ruleset, exec_context)
+   if result == "" then
+      return true
+   end
+   return result, msg
+end
+
+function builtin.include(comp_context, cmd, file, ...)
+   local safe_if_not_present = cmd:sub(-1) == "?"
+
+   local conds = {...}
+   
+   if type(file) ~= "string" then
+      return compiler().error("No file named for inclusion")
+   end
+
+   local loader = compiler().internal_loader(comp_context)
+   local real, content = loader(comp_context, file)
+
+   if not real then
+      -- Could not find the file
+      if safe_if_not_present then
+	 -- Include file was not present, just return an empty command
+	 return {
+	    fn = function() return true end,
+	    args = {}
+	 }
+      end
+      -- Otherwise, propagate the error
+      return real, content
+   end
+   
+   -- Okay, the file is present, let's parse it.
+   local ruleset, msg = compiler().internal_compile(comp_context, real, content, true)
+   if type(ruleset) ~= "table" then
+      return compiler().error(msg)
+   end
+   
+   -- Okay, we parsed, so build the runtime
+   return {
+      fn = _do_include,
+      args = { ruleset, conds }
+   }
+end
 
 return {
    commands = builtin,

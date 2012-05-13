@@ -274,7 +274,6 @@ function suite.run_allow_deny_with_condition_present_failing()
    }
    local ectx = {[".lace"] = {defs = { cheese = _cheesetab }}}
    local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
-   print(ok, msg)
    assert(ok == true, "Running a conditional allow where the conditions fail should return continuation")
 end
 
@@ -290,7 +289,6 @@ function suite.run_allow_deny_with_condition_present_passing()
    }
    local ectx = {[".lace"] = {defs = { cheese = _cheesetab }}}
    local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
-   print(ok, msg)
    assert(ok == "allow", "Running a conditional allow where the conditions pass should return allow")
    assert(msg == "because", "Resulting in the reason given")
 end
@@ -306,7 +304,6 @@ function suite.run_allow_deny_with_inverted_condition_present_failing()
    }
    local ectx = {[".lace"] = {defs = { cheese = _cheesetab }}}
    local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
-   print(ok, msg)
    assert(ok == true, "Running a conditional allow where the conditions fail should return continuation")
 end
 
@@ -322,9 +319,172 @@ function suite.run_allow_deny_with_inverted_condition_present_passing()
    }
    local ectx = {[".lace"] = {defs = { cheese = _cheesetab }}}
    local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
-   print(ok, msg)
    assert(ok == "allow", "Running a conditional allow where the conditions pass should return allow")
    assert(msg == "because", "Resulting in the reason given")
+end
+
+function suite.compile_include_statement_noname()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.include(compctx, "include")
+   assert(cmdtab == false, "Internal errors should return false")
+   assert(type(msg) == "table", "Internal errors should return tables")
+   assert(type(msg.msg) == "string", "Internal errors should have string messages")
+   assert(msg.msg:match("file name"), "Expected error should mention a lack of name")
+end
+
+function suite.compile_include_statement_noloader()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.include(compctx, "include", "fish")
+   assert(cmdtab == false, "Internal errors should return false")
+   assert(type(msg) == "table", "Internal errors should return tables")
+   assert(type(msg.msg) == "string", "Internal errors should have string messages")
+   assert(msg.msg:match("fish"), "Expected error should mention a name of unloadable content")
+end
+
+function suite.compile_safe_include_statement_noloader()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.include(compctx, "include?", "fish")
+   assert(type(cmdtab) == "table", "Commands should be tables")
+   assert(type(cmdtab.fn) == "function", "With a function")
+   assert(type(cmdtab.args) == "table", "and arguments")
+end
+
+function suite.compile_include_statement_withloader()
+   local function _loader(cctx, name)
+      return name, "-- nada\n"
+   end
+   local compctx = {[".lace"] = {loader=_loader}}
+   local cmdtab, msg = builtin.commands.include(compctx, "include", "fish")
+   assert(type(cmdtab) == "table", "Commands should be tables")
+   assert(type(cmdtab.fn) == "function", "With a function")
+   assert(type(cmdtab.args) == "table", "and arguments")
+end
+
+function suite.compile_include_statement_withloader_badcode()
+   local function _loader(cctx, name)
+      return name, "nada\n"
+   end
+   local compctx = {[".lace"] = {loader=_loader}}
+   local cmdtab, msg = builtin.commands.include(compctx, "include", "fish")
+   assert(cmdtab == false, "Internal errors should return false")
+   assert(type(msg) == "table", "Internal errors should return tables")
+   assert(type(msg.msg) == "string", "Internal errors should have string messages")
+   assert(msg.msg:match("nada"), "Expected error should mention the bad command name")
+end
+
+function suite.run_include_statement_withloader_good_code()
+   local function _loader(cctx, name)
+      return name, "--nada\n"
+   end
+   local compctx = {[".lace"] = {loader=_loader}}
+   local cmdtab, msg = builtin.commands.include(compctx, "include", "fish")
+   assert(type(cmdtab) == "table", "Commands should be tables")
+   assert(type(cmdtab.fn) == "function", "With a function")
+   assert(type(cmdtab.args) == "table", "and arguments")
+   local ectx = {}
+   local result, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
+   assert(result == true, "Should be continuing as-is")
+end
+
+function suite.run_include_statement_withloader_good_code_allow()
+   local function _loader(cctx, name)
+      return name, "allow because\n"
+   end
+   local compctx = {[".lace"] = {loader=_loader}}
+   local cmdtab, msg = builtin.commands.include(compctx, "include", "fish")
+   assert(type(cmdtab) == "table", "Commands should be tables")
+   assert(type(cmdtab.fn) == "function", "With a function")
+   assert(type(cmdtab.args) == "table", "and arguments")
+   local ectx = {}
+   local result, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
+   assert(result == "allow", "Should pass result")
+   assert(msg == "because", "Should pass reason")
+end
+
+function suite.run_cond_include_present_erroring()
+   local function _loader(cctx, name)
+      return name, "allow because\n"
+   end
+   local compctx = {[".lace"] = {loader=_loader}}
+   local cmdtab, msg = builtin.commands.include(compctx, "include", "fish", "cheese")
+   assert(type(cmdtab) == "table", "Commands should be tables")
+   assert(type(cmdtab.fn) == "function", "With a function")
+   assert(type(cmdtab.args) == "table", "and arguments")
+   local ectx = {}
+   local result, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
+   assert(result == nil, "Should fail gracefully")
+   assert(msg.msg:match("cheese"), "Error should mention undefined variable")
+end
+
+function suite.run_cond_include_present_erroring()
+   local function _loader(cctx, name)
+      return name, "allow because\n"
+   end
+   local compctx = {[".lace"] = {loader=_loader}}
+   local cmdtab, msg = builtin.commands.include(compctx, "include", "fish", "cheese")
+   assert(type(cmdtab) == "table", "Commands should be tables")
+   assert(type(cmdtab.fn) == "function", "With a function")
+   assert(type(cmdtab.args) == "table", "and arguments")
+   local ectx = {
+      [".lace"] = {
+	 defs = {
+	    cheese = {
+	       fn = function() return nil, { msg = "FAIL" } end,
+	       args = {}
+	    }
+	 }
+      }
+   }
+   local result, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
+   assert(result == nil, "Should fail gracefully")
+   assert(msg.msg:match("FAIL"), "Error should mention undefined variable")
+end
+
+function suite.run_cond_include_present_failing()
+   local function _loader(cctx, name)
+      return name, "allow because\n"
+   end
+   local compctx = {[".lace"] = {loader=_loader}}
+   local cmdtab, msg = builtin.commands.include(compctx, "include", "fish", "cheese")
+   assert(type(cmdtab) == "table", "Commands should be tables")
+   assert(type(cmdtab.fn) == "function", "With a function")
+   assert(type(cmdtab.args) == "table", "and arguments")
+   local ectx = {
+      [".lace"] = {
+	 defs = {
+	    cheese = {
+	       fn = function() return false end,
+	       args = {}
+	    }
+	 }
+      }
+   }
+   local result, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
+   assert(result == true, "Should continue blithely")
+end
+
+function suite.run_cond_include_present_passing()
+   local function _loader(cctx, name)
+      return name, "allow because\n"
+   end
+   local compctx = {[".lace"] = {loader=_loader}}
+   local cmdtab, msg = builtin.commands.include(compctx, "include", "fish", "cheese")
+   assert(type(cmdtab) == "table", "Commands should be tables")
+   assert(type(cmdtab.fn) == "function", "With a function")
+   assert(type(cmdtab.args) == "table", "and arguments")
+   local ectx = {
+      [".lace"] = {
+	 defs = {
+	    cheese = {
+	       fn = function() return true end,
+	       args = {}
+	    }
+	 }
+      }
+   }
+   local result, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
+   assert(result == "allow", "Should propagate success")
+   assert(msg == "because", "Should propagate reason")
 end
 
 local count_ok = 0
