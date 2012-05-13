@@ -168,6 +168,18 @@ function suite.test_allow_with_define_used_works_and_passes()
    assert(msg == "because", "Because")
 end
 
+function suite.test_complex_ruleset()
+   local ruleset, msg = lace.compiler.compile(comp_context, "complexruleset")
+   assert(type(ruleset) == "table", "Ruleset did not compile")
+   for _, s in ipairs{"one","two","three","four"} do
+      local expect = (s == "one" or s == "two") and "allow" or "deny"
+      local ectx = {state=s}
+      local result, msg = lace.engine.run(ruleset, ectx)
+      assert(result == expect, "Expected " .. expect)
+      assert(msg == s, "Reason expected " .. s)
+   end
+end
+
 local count_ok = 0
 for _, testname in ipairs(testnames) do
    print("Run: " .. testname)

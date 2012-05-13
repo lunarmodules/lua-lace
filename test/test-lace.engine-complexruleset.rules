@@ -1,0 +1,19 @@
+// This is a complex ruleset intended to use
+# All of the features of lace
+-- So that we can be sure it all works
+
+// Error cases are covered in individual tests
+-- So the purpose of these tests is to compile
+# and to work
+
+default deny "four"
+
+include complexruleset-definitions
+
+allow one first
+
+include complexruleset-allowsecond second
+
+deny three third
+
+-- Expect four denial, despite last action being a deny
