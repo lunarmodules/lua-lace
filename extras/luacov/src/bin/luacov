@@ -14,8 +14,19 @@ local report = io.open("luacov.report.out", "w")
 
 -- only report on files specified on the command line
 local patterns = {}
+local exclude_patterns = {}
+local exclude_next = false
 for i = 1, #arg do
-   patterns[i] = arg[i]
+   if arg[i] == "-X" then
+      exclude_next = true
+   else
+      if exclude_next then
+         exclude_patterns[#exclude_patterns+1] = arg[i]
+         exclude_next = false
+      else
+         patterns[#patterns+1] = arg[i]
+      end
+   end
 end
 
 local names = {}
@@ -30,6 +41,14 @@ for filename, _ in pairs(data) do
             include = true
             break
          end
+      end
+      if include then
+         for _, p in ipairs(exclude_patterns) do
+	    if path:match(p) then
+	       include = false
+	       break
+	    end
+	 end
       end
       if include then
          table.insert(names, filename)
