@@ -149,6 +149,8 @@ local function compile_ruleset(ctx, src, cnt)
 end
 
 return {
+   internal_loader = _loader,
+   internal_compile = internal_compile_ruleset,
    compile = compile_ruleset,
    error = _error,
 }
