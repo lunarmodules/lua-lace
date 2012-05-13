@@ -32,8 +32,24 @@ local function get_set_last_result(newv)
 end
 
 local function _do_return(exec_context, result, reason, cond)
-   if #cond > 0 then
-      -- Run the conditions
+   for i = 1, #cond do
+      local name = cond[i]
+      local invert = false
+      if name:sub(1,1) == "!" then
+	 invert = true
+	 name = name:sub(2)
+      end
+      local res, msg = engine.test(exec_context, name)
+      if res == nil then
+	 return nil, msg
+      end
+      if invert then
+	 res = not res
+      end
+      if not res then
+	 -- condition failed, return true to continue execution
+	 return true
+      end
    end
    return result, reason
 end

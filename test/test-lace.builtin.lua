@@ -237,6 +237,96 @@ function suite.compile_builtin_define_ok()
    assert(ectx[".lace"].defs.fish.JEFF, "definition should have passed through")
 end
 
+function suite.run_allow_deny_with_conditions_not_present()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.allow(compctx, "allow", "because", "cheese")
+   assert(type(cmdtab) == "table", "Successful compilation returns tables")
+   assert(type(cmdtab.fn) == "function", "With functions")
+   local ectx = {}
+   local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
+   assert(ok == nil, "Running a conditional allow where the conditions are not defined should fail")
+   assert(msg.msg:match("cheese"), "Resultant error should indicate missing variable name")
+end
+
+function suite.run_allow_deny_with_condition_present_erroring()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.allow(compctx, "allow", "because", "cheese")
+   assert(type(cmdtab) == "table", "Successful compilation returns tables")
+   assert(type(cmdtab.fn) == "function", "With functions")
+   local _cheesetab = {
+      fn = function() return nil, { msg = "CHEESE" } end,
+      args = {}
+   }
+   local ectx = {[".lace"] = {defs = { cheese = _cheesetab }}}
+   local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
+   assert(ok == nil, "Running a conditional allow where the conditions error should fail")
+   assert(msg.msg:match("CHEESE"), "Resultant error should be passed")
+end
+
+function suite.run_allow_deny_with_condition_present_failing()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.allow(compctx, "allow", "because", "cheese")
+   assert(type(cmdtab) == "table", "Successful compilation returns tables")
+   assert(type(cmdtab.fn) == "function", "With functions")
+   local _cheesetab = {
+      fn = function() return false end,
+      args = {}
+   }
+   local ectx = {[".lace"] = {defs = { cheese = _cheesetab }}}
+   local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
+   print(ok, msg)
+   assert(ok == true, "Running a conditional allow where the conditions fail should return continuation")
+end
+
+
+function suite.run_allow_deny_with_condition_present_passing()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.allow(compctx, "allow", "because", "cheese")
+   assert(type(cmdtab) == "table", "Successful compilation returns tables")
+   assert(type(cmdtab.fn) == "function", "With functions")
+   local _cheesetab = {
+      fn = function() return true end,
+      args = {}
+   }
+   local ectx = {[".lace"] = {defs = { cheese = _cheesetab }}}
+   local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
+   print(ok, msg)
+   assert(ok == "allow", "Running a conditional allow where the conditions pass should return allow")
+   assert(msg == "because", "Resulting in the reason given")
+end
+
+function suite.run_allow_deny_with_inverted_condition_present_failing()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.allow(compctx, "allow", "because", "!cheese")
+   assert(type(cmdtab) == "table", "Successful compilation returns tables")
+   assert(type(cmdtab.fn) == "function", "With functions")
+   local _cheesetab = {
+      fn = function() return true end,
+      args = {}
+   }
+   local ectx = {[".lace"] = {defs = { cheese = _cheesetab }}}
+   local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
+   print(ok, msg)
+   assert(ok == true, "Running a conditional allow where the conditions fail should return continuation")
+end
+
+
+function suite.run_allow_deny_with_inverted_condition_present_passing()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.allow(compctx, "allow", "because", "!cheese")
+   assert(type(cmdtab) == "table", "Successful compilation returns tables")
+   assert(type(cmdtab.fn) == "function", "With functions")
+   local _cheesetab = {
+      fn = function() return false end,
+      args = {}
+   }
+   local ectx = {[".lace"] = {defs = { cheese = _cheesetab }}}
+   local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
+   print(ok, msg)
+   assert(ok == "allow", "Running a conditional allow where the conditions pass should return allow")
+   assert(msg == "because", "Resulting in the reason given")
+end
+
 local count_ok = 0
 for _, testname in ipairs(testnames) do
    print("Run: " .. testname)
