@@ -69,7 +69,7 @@ local function compile_one_line(compcontext, line)
    return cmdfn(compcontext, unpack(args))
 end
 
-local function internal_compile_ruleset(compcontext, sourcename, content)
+local function internal_compile_ruleset(compcontext, sourcename, content, suppress_default)
    assert(type(compcontext) == "table", "Compilation context must be a table")
    assert(type(compcontext[".lace"]) == "table", "Compilation context must contain a .lace table")
    assert(type(sourcename) == "string", "Source name must be a string")
@@ -120,11 +120,11 @@ local function internal_compile_ruleset(compcontext, sourcename, content)
    --     in which case use the default
    --   There's no unconditional result and no default, fake up a default and
    --     then use it.
-   if not uncond and not result then
+   if not suppress_default and not uncond and not result then
       return false, "No result set whatsoever"
    end
 
-   if not uncond then
+   if not suppress_default and not uncond then
       if not compcontext[".lace"].default then
 	 -- No default, fake one up
 	 builtin.commands.default(compcontext, "default",
