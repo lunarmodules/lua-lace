@@ -1,0 +1,5 @@
+-- Trivial ruleset should total 5 lines
+// The first three are comments
+# The fourth is whitespace and the fifth is a statement of 2 words
+
+   deny "I hate world"   
