@@ -1,0 +1,23 @@
+Syntax of include statements
+----------------------------
+
+Include statements take a source token to include and an optional list
+of definitions which must all be true before the include will take
+place.
+
+'include' <sourcename> <0-or-more-definitions>
+
+If the include ends with a question mark then should the sourcename
+not be available at the time, it will be silently ignored.
+
+Nominally an included ruleset is linearly inserted into the execution
+stream there and then.  In practice, while include statements result
+in compilation of the rulesets at the same time, the contents of the
+ruleset will not be run unless the definitions all pass.  This means
+that the defines will not happen unless the definitions all pass.  As
+such, use conditional includes carefully.
+
+If an "optional" include source isn't available, it is as though the
+definitions did not pass.  If a mandatory include source isn't
+available then compilation of the ruleset will fail immediately.
+
