@@ -73,6 +73,6 @@ for _, testname in ipairs(testnames) do
    end
 end
 
-print("Lace: " .. tostring(count_ok) .. "/" .. tostring(#testnames) .. " OK")
+print("Builtin: " .. tostring(count_ok) .. "/" .. tostring(#testnames) .. " OK")
 
 os.exit(count_ok == #testnames and 0 or 1)
