@@ -19,7 +19,7 @@ test:
 		$(LUA) test/test-$${MOD}.lua; \
 		test "x$$?" = "x0" || ERR=1; \
 	done; \
-	$(LUA) extras/luacov/src/bin/luacov -X test. $(TEST_MODULES); \
+	$(LUA) extras/luacov/src/bin/luacov -X luacov. -X test. $(TEST_MODULES); \
 	exit $$ERR
 
 .PHONY: interactive

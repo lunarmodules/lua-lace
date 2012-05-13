@@ -15,8 +15,7 @@ end
 
 --[ Allow and Deny ]------------------------------------------------
 
-local unconditional_result = nil
-local last_result = nil
+local unconditional_result, last_result
 
 local function get_set_last_unconditional_result(newv)
    local ret = unconditional_result
