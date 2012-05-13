@@ -14,6 +14,8 @@ local luacov = require 'luacov'
 local lace = require 'lace'
 local lex = require 'lace.lex'
 local compiler = require 'lace.compiler'
+local builtin = require 'lace.builtin'
+local engine = require 'lace.engine'
 
 local testnames = {}
 
@@ -30,6 +32,14 @@ end
 
 function suite.compiler_passed()
    assert(lace.compiler == compiler, "Lace's compiler entry is not lace.compiler")
+end
+
+function suite.builtin_passed()
+   assert(lace.builtin == builtin, "Lace's builtin entry is not lace.builtin")
+end
+
+function suite.engine_passed()
+   assert(lace.engine == engine, "Lace's engine entry is not lace.engine")
 end
 
 local count_ok = 0

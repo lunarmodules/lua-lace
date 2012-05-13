@@ -10,9 +10,11 @@
 local lex = require "lace.lex"
 local compiler = require "lace.compiler"
 local builtin = require "lace.builtin"
+local engine = require "lace.engine"
 
 return {
    lex = lex,
    compiler = compiler,
    builtin = builtin,
+   engine = engine,
 }
