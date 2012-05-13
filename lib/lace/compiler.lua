@@ -95,6 +95,12 @@ local function internal_compile_ruleset(compcontext, sourcename, content, suppre
    local prev_uncond_result = builtin.get_set_last_unconditional_result()
    local prev_result = builtin.get_set_last_result()
 
+   if not suppress_default then
+      -- Ensure there's no default present before processing.
+      -- We only suppress inside includes
+      compcontext[".lace"].default = nil
+   end
+
    for i = 1, #lexed_content.lines do
       local line = lexed_content.lines[i]
       if line.type == "rule" then
