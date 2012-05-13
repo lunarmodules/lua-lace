@@ -54,8 +54,11 @@ local function lex_one_line(line)
 	 elseif c == " " or c == "\t" then
 	    -- A space (or tab) and not quoting, so clear the accumulator
 	    if acc ~= "" then
-	       r[#r+1] = { spos, acc }
+	       r[#r+1] = { spos, acc, pos = spos, str = acc }
 	       spos = cpos + 1
+	    elseif cpos == spos then
+	       -- Increment the start position since we've not found a word yet
+	       spos = spos + 1
 	    end
 	    acc = ""
 	 else
@@ -64,7 +67,7 @@ local function lex_one_line(line)
       end
    end
    if acc ~= "" then
-      r[#r+1] = { spos, acc }
+      r[#r+1] = { spos, acc, pos = spos, str = acc }
    end
 
    local warnings = {}
@@ -86,25 +89,28 @@ local function lex_a_ruleset(ruleset, sourcename)
    local ret = { source = sourcename, lines = lines }
    local n = 1
    local warn
+   if ruleset:match("[^\n]$") then
+      ruleset = ruleset .. "\n"
+   end
    for oneline in ruleset:gmatch("([^\n]*)\n") do
       local linetab = { original = oneline }
-      if linetab:find("^[ \t]*#") or
-	 linetab:find("^[ \t]*//") or
-	 linetab:find("^[ \t]*%-%-") then
+      if oneline:match("^[ \t]*#") or
+	 oneline:match("^[ \t]*//") or
+	 oneline:match("^[ \t]*%-%-") then
 	 linetab.type = "comment"
-      elseif linetab:find("^[ \t]*$") then
+      elseif oneline:match("^[ \t]*$") then
 	 linetab.type = "whitespace"
       else
 	 linetab.type = "rule"
 	 linetab.content, warn = lex_one_line(oneline)
-	 if #warn then
+	 if #warn > 0 then
 	    linetab.warnings = warn
 	 end
       end
       lines[n] = linetab
       n = n + 1
    end
-   return lines
+   return ret
 end
 
 local function lex_a_file(filename)
