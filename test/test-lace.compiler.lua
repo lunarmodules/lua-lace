@@ -55,13 +55,62 @@ end
 
 function suite.empty_content_no_loader()
    local result, msg = compiler.compile({[".lace"] = {}}, "", "")
-   assert(type(result) == "table", "No ruleset returned?")
+   assert(result == false, "Internal errors should return false")
+   assert(msg:match("whatsoever"), "Supposed to whinge about no allow/deny at all")
 end
 
 function suite.no_content_no_loader()
    local result, msg = compiler.compile({[".lace"] = {}}, "")
    assert(result == false, "Internal errors should return false")
    assert(msg:match("Ruleset not found:"), "Supposed to whinge about ruleset not being found")
+end
+
+function suite.no_unconditional_action()
+   local result, msg = compiler.compile({[".lace"] = {}}, "", "deny stuff cond")
+   assert(type(result) == "table", "Loading a ruleset should result in a table")
+   assert(#result.rules == 2, "There should be two rules present")
+   local rule = result.rules[1]
+   assert(type(rule) == "table", "Rules should be tables")
+   assert(type(rule.fn) == "function", "Rules should have functions")
+   assert(type(rule.args) == "table", "Rules should have arguments")
+   -- rule 2 should be an unconditional allow with 'Default behaviour' as the reason,
+   -- let's check
+   local r2a = result.rules[2].args
+   assert(r2a[1] == "allow", "Rule 2 should be an allow")
+   assert(r2a[2] == "Default behaviour", "Rule 2's reason should be 'Default behaviour'")
+   assert(#r2a[3] == 0, "Rule 2 should have no conditions")
+end
+
+function suite.no_unconditional_action_default_deny()
+   local result, msg = compiler.compile({[".lace"] = {}}, "", "default deny\ndeny stuff cond")
+   assert(type(result) == "table", "Loading a ruleset should result in a table")
+   assert(#result.rules == 3, "There should be three rules present")
+   local rule = result.rules[1]
+   assert(type(rule) == "table", "Rules should be tables")
+   assert(type(rule.fn) == "function", "Rules should have functions")
+   assert(type(rule.args) == "table", "Rules should have arguments")
+   -- rule 3 should be an unconditional deny with 'Default behaviour' as the reason,
+   -- let's check
+   local r3a = result.rules[3].args
+   assert(r3a[1] == "deny", "Rule 3 should be a deny, despite last rule behind a deny")
+   assert(r3a[2] == "Default behaviour", "Rule 3's reason should be 'Default behaviour'")
+   assert(#r3a[3] == 0, "Rule 2 should have no conditions")
+end
+
+function suite.is_unconditional_action_default_deny()
+   local result, msg = compiler.compile({[".lace"] = {}}, "", "default deny\nallow stuff")
+   assert(type(result) == "table", "Loading a ruleset should result in a table")
+   assert(#result.rules == 2, "There should be two rules present")
+   local rule = result.rules[1]
+   assert(type(rule) == "table", "Rules should be tables")
+   assert(type(rule.fn) == "function", "Rules should have functions")
+   assert(type(rule.args) == "table", "Rules should have arguments")
+   -- rule 2 should be an unconditional allow with 'stuff' as the reason
+   -- let's check
+   local r2a = result.rules[2].args
+   assert(r2a[1] == "allow", "Rule 2 should be an allow, despite default being deny")
+   assert(r2a[2] == "stuff", "Rule 2's reason should be 'stuff'")
+   assert(#r2a[3] == 0, "Rule 2 should have no conditions")
 end
 
 -- Now we set up a more useful context and use that going forward:
@@ -100,8 +149,8 @@ end
 
 function suite.load_file_with_no_rules()
    local result, msg = compiler.compile(comp_context, "nothing")
-   assert(type(result) == "table", "Loading a ruleset should result in a table")
-   assert(#result.rules == 0, "There should be no rules present")
+   assert(result == false, "Internal errors should return false")
+   assert(msg:match("whatsoever"), "Error returned didn't match expected whinge about no allow/deny")
 end
 
 function suite.load_file_with_bad_command()

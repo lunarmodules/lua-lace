@@ -92,6 +92,9 @@ local function internal_compile_ruleset(compcontext, sourcename, content)
       rules = {},
    }
    
+   local prev_uncond_result = builtin.get_set_last_unconditional_result()
+   local prev_result = builtin.get_set_last_result()
+
    for i = 1, #lexed_content.lines do
       local line = lexed_content.lines[i]
       if line.type == "rule" then
@@ -104,6 +107,31 @@ local function internal_compile_ruleset(compcontext, sourcename, content)
 	 rule.linenr = i
 	 ruleset.rules[#ruleset.rules+1] = rule
       end
+   end
+
+   -- And restore the builtin result (in case we were chained/included)
+   local uncond = builtin.get_set_last_unconditional_result(prev_uncond_result)
+   local result = builtin.get_set_last_result(prev_result)
+   -- Finally consider the default behaviour
+   -- Cases to consider are:
+   --   There's an unconditional result, in which case no problem
+   --   There's no result whatsoever, conditional or otherwise, error out
+   --   There's no unconditional result but there's a default
+   --     in which case use the default
+   --   There's no unconditional result and no default, fake up a default and
+   --     then use it.
+   if not uncond and not result then
+      return false, "No result set whatsoever"
+   end
+
+   if not uncond then
+      if not compcontext[".lace"].default then
+	 -- No default, fake one up
+	 builtin.commands.default(compcontext, "default",
+				  result == "allow" and "deny" or "allow")
+      end
+      -- Now, inject the default command at the end of the ruleset.
+      ruleset.rules[#ruleset.rules+1] = compcontext[".lace"].default
    end
 
    _setposition(compcontext)

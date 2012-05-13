@@ -80,8 +80,10 @@ function builtin.default(compcontext, def, result, reason, unwanted)
    if compcontext[".lace"].default then
       return compiler().error("Cannot change the default")
    end
-
+   
+   local uncond, last = unconditional_result, last_result
    compcontext[".lace"].default = _return(compcontext, result, reason)
+   unconditional_result, last_result = uncond, last
 
    return {
       fn = function() return true end,
