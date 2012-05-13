@@ -13,6 +13,8 @@ local luacov = require 'luacov'
 
 local lace = require 'lace'
 
+local sio = require 'luxio.simple'
+
 local testnames = {}
 
 local function add_test(suite, name, value)
@@ -63,21 +65,12 @@ function suite.check_can_test_known_functions()
    assert(ctx.ran, "Context was not passed properly")
 end
 
-function suite.check_empty_ruleset_fails()
-   local compctx = {[".lace"]={}}
-   local ruleset, msg = lace.compiler.compile(compctx, "src", "")
-   assert(type(ruleset) == "table", "Could not compile empty ruleset")
-   local execctx = {}
-   local result, msg = lace.engine.run(ruleset, execctx)
-   assert(result == false, "Empty failure returns false")
-end
-
 function suite.check_bad_exec_fn_returns_nil()
    local function _explode()
       return { fn = function() error("EXPLODE") end, args = {} }
    end
    local compctx = {[".lace"]={commands={explode=_explode}}}
-   local ruleset, msg = lace.compiler.compile(compctx, "src", "explode")
+   local ruleset, msg = lace.compiler.compile(compctx, "src", "explode\nallow because")
    assert(type(ruleset) == "table", "Could not compile exploding ruleset")
    local execctx = {}
    local result, msg = lace.engine.run(ruleset, execctx)
@@ -90,7 +83,7 @@ function suite.check_error_propagates()
       return { fn = function() return false, "EXPLODE" end, args = {} }
    end
    local compctx = {[".lace"]={commands={explode=_explode}}}
-   local ruleset, msg = lace.compiler.compile(compctx, "src", "explode")
+   local ruleset, msg = lace.compiler.compile(compctx, "src", "explode\nallow because")
    assert(type(ruleset) == "table", "Could not compile exploding ruleset")
    local execctx = {}
    local result, msg = lace.engine.run(ruleset, execctx)
@@ -106,6 +99,73 @@ function suite.check_deny_works()
    local result, msg = lace.engine.run(ruleset, execctx)
    assert(result == "deny", "Denial not returned")
    assert(msg:match("everything"), "Expected reason not detected")
+end
+
+-- More complete engine tests from here
+
+local comp_context = {
+   [".lace"] = {
+      loader = function(ctx, name)
+		  if name == "THROW_ERROR" then
+		     error("THROWN")
+		  end
+		  local fh, msg = sio.open("test/test-lace.engine-" .. name .. ".rules", "r")
+		  if not fh then
+		     return compiler.error("LOADER: Unknown: " .. name, {1})
+		  end
+		  local content = fh:read("*a")
+		  fh:close()
+		  return "real-" .. name, content
+	       end,
+      commands = {
+      },
+      controltype = {
+	 equal = function(ctx, eq, key, value)
+		    return {
+		       fn = function(ectx, ekey, evalue)
+			       return ectx[ekey] == evalue
+			    end,
+		       args = { key, value },
+		    }
+		 end,
+      },
+   },
+}
+
+function suite.test_plainallow_works()
+   local ruleset, msg = lace.compiler.compile(comp_context, "plainallow")
+   assert(type(ruleset) == "table", "Ruleset did not compile")
+   local ectx = {}
+   local result, msg = lace.engine.run(ruleset, ectx)
+   assert(result == "allow", "Should allow")
+   assert(msg == "because", "Because")
+end
+
+function suite.test_allow_with_define_works()
+   local ruleset, msg = lace.compiler.compile(comp_context, "allowwithdefine")
+   assert(type(ruleset) == "table", "Ruleset did not compile")
+   local ectx = {}
+   local result, msg = lace.engine.run(ruleset, ectx)
+   assert(result == "allow", "Should allow")
+   assert(msg == "because", "Because")
+end
+
+function suite.test_allow_with_define_used_works()
+   local ruleset, msg = lace.compiler.compile(comp_context, "allowwithdefineused")
+   assert(type(ruleset) == "table", "Ruleset did not compile")
+   local ectx = {}
+   local result, msg = lace.engine.run(ruleset, ectx)
+   assert(result == "deny", "Should deny")
+   assert(msg == "Default behaviour", "Because allow failed")
+end
+
+function suite.test_allow_with_define_used_works_and_passes()
+   local ruleset, msg = lace.compiler.compile(comp_context, "allowwithdefineused")
+   assert(type(ruleset) == "table", "Ruleset did not compile")
+   local ectx = {this="that"}
+   local result, msg = lace.engine.run(ruleset, ectx)
+   assert(result == "allow", "Should allow")
+   assert(msg == "because", "Because")
 end
 
 local count_ok = 0

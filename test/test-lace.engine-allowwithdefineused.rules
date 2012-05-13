@@ -1,0 +1,5 @@
+-- Simple conditional allow with a define present and used
+
+define is_ok equal this that
+
+allow because is_ok
