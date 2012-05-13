@@ -1,0 +1,6 @@
+-- This is a ruleset which should result in no rules being
+-- compiled.
+
+# It is comprised entirely of comments and whitespace
+
+// Is it not nifty?
