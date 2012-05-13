@@ -16,10 +16,17 @@ end
 --[ Allow and Deny ]------------------------------------------------
 
 local unconditional_result = nil
+local last_result = nil
 
 local function get_set_last_unconditional_result(newv)
    local ret = unconditional_result
    unconditional_result = newv
+   return ret
+end
+
+local function get_set_last_result(newv)
+   local ret = last_result
+   last_result = newv
    return ret
 end
 
@@ -42,6 +49,7 @@ local function _return(compcontext, result, reason, ...)
    if #cond == 0 then
       unconditional_result = result
    end
+   last_result = result
 
    return {
       fn = _do_return,
@@ -84,4 +92,5 @@ end
 return {
    commands = builtin,
    get_set_last_unconditional_result = get_set_last_unconditional_result,
+   get_set_last_result = get_set_last_result,
 }

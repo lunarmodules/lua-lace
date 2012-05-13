@@ -67,8 +67,13 @@ function suite.builtin_get_set_unconditional()
 	  "Result not saved")
 end
 
+function suite.builtin_get_set_last()
+   builtin.get_set_last_result("FOO")
+   assert(builtin.get_set_last_result() == "FOO",
+	  "Result not saved")
+end
+
 function suite.run_builtin_allow_deny_unconditional_saved()
-   -- Clear
    builtin.get_set_last_unconditional_result()
 
    local cmdtab, msg = builtin.commands.allow({}, "allow", "because")
@@ -81,6 +86,18 @@ function suite.run_builtin_allow_deny_unconditional_saved()
 
    local last = builtin.get_set_last_unconditional_result()
    assert(last == "allow", "The last unconditional result was not allow?")
+end
+
+function suite.run_builtin_allow_deny_conditional_saved()
+   builtin.get_set_last_result()
+
+   local cmdtab, msg = builtin.commands.allow({}, "allow", "because", "fishes")
+   assert(type(cmdtab) == "table", "Result should be a table")
+   assert(type(cmdtab.fn) == "function", "Result should contain a function")
+   assert(type(cmdtab.args) == "table", "Result table should contain an args table")
+
+   local last = builtin.get_set_last_result()
+   assert(last == "allow", "The last conditional result was not allow?")
 end
 
 function suite.compile_builtin_default_noresult()
