@@ -1,6 +1,6 @@
 -- test/test-compiler.lua
 --
--- Lua Access Control Engine -- Tests for the compilerer
+-- Lua Access Control Engine -- Tests for the compiler
 --
 -- Copyright 2012 Daniel Silverstone <dsilvers@digital-scurf.org>
 --
