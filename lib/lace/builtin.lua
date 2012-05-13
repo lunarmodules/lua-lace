@@ -9,6 +9,8 @@
 
 local builtin = {}
 
+local engine = require "lace.engine"
+
 local function compiler()
    return require "lace.compiler"
 end
@@ -89,6 +91,51 @@ function builtin.default(compcontext, def, result, reason, unwanted)
       args = {}
    }
 end
+
+--[ Definitions ]----------------------------------------------------
+
+local function _controlfn(ctx, name)
+   local ctt = ctx[".lace"].controltype or {}
+   return ctt[name]
+end
+
+function builtin.define(compcontext, define, name, controltype, ...)
+   if type(name) ~= "string" then
+      return compiler().error("Expected name, got nothing")
+   end
+
+   if name == "" or name:sub(1,1) == "!" then
+      return compiler().error("Bad name for definition", {2})
+   end
+
+   if type(controltype) ~= "string" then
+      return compiler().error("Expected control type, got nothing")
+   end
+   
+   local controlfn = _controlfn(compcontext, controltype)
+   if not controlfn then
+      return compiler().error("Unknown control type", {3})
+   end
+
+   local ctrltab, msg = controlfn(compcontext, controltype, ...)
+   if type(ctrltab) ~= "table" then
+      -- offset all the words in the error by 2 (for define and name)
+      if msg.words then
+	 for i = 1, #msg.words do
+	    msg.words[i] = msg.words[i] + 2
+	 end
+      end
+      return false, msg
+   end
+
+   -- Successfully created a control table, return a rule for it
+   return {
+      fn = engine.define,
+      args = { name, ctrltab }
+   }
+end
+
+builtin.def = builtin.define
 
 return {
    commands = builtin,

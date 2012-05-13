@@ -160,6 +160,82 @@ function suite.compile_builtin_default_noreason()
    assert(type(compctx[".lace"].default.fn) == "function", "Default table should have a function like a rule")
 end
 
+function suite.compile_builtin_define_noname()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.define(compctx, "define")
+   assert(cmdtab == false, "Internal errors should return false")
+   assert(type(msg) == "table", "Internal errors should return tables")
+   assert(type(msg.msg) == "string", "Internal errors should have string messages")
+   assert(msg.msg:match("Expected name"), "Expected error should mention a lack of name")
+end
+
+function suite.compile_builtin_define_badname()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.define(compctx, "define", "!fish")
+   assert(cmdtab == false, "Internal errors should return false")
+   assert(type(msg) == "table", "Internal errors should return tables")
+   assert(type(msg.msg) == "string", "Internal errors should have string messages")
+   assert(msg.msg:match("Bad name"), "Expected error should mention a bad name")
+end
+
+function suite.compile_builtin_define_noctype()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.define(compctx, "define", "fish")
+   assert(cmdtab == false, "Internal errors should return false")
+   assert(type(msg) == "table", "Internal errors should return tables")
+   assert(type(msg.msg) == "string", "Internal errors should have string messages")
+   assert(msg.msg:match("Expected control"), "Expected error should mention a lack of control type")
+end
+
+function suite.compile_builtin_define_badctype()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.define(compctx, "define", "fish", "fish")
+   assert(cmdtab == false, "Internal errors should return false")
+   assert(type(msg) == "table", "Internal errors should return tables")
+   assert(type(msg.msg) == "string", "Internal errors should have string messages")
+   assert(msg.msg:match("Unknown control"), "Expected error should mention unknown control type")
+end
+
+function suite.compile_builtin_define_ctype_errors()
+   local function _fish()
+      return false, { msg = "Argh" }
+   end
+   local compctx = {[".lace"] = { controltype = { fish = _fish }}}
+   local cmdtab, msg = builtin.commands.define(compctx, "define", "fish", "fish")
+   assert(cmdtab == false, "Internal errors should return false")
+   assert(type(msg) == "table", "Internal errors should return tables")
+   assert(type(msg.msg) == "string", "Internal errors should have string messages")
+   assert(msg.msg:match("Argh"), "Expected error should be passed through")
+end
+
+function suite.compile_builtin_define_ctype_errors_offset()
+   local function _fish()
+      return false, { msg = "Argh", words = {0} }
+   end
+   local compctx = {[".lace"] = { controltype = { fish = _fish }}}
+   local cmdtab, msg = builtin.commands.define(compctx, "define", "fish", "fish")
+   assert(cmdtab == false, "Internal errors should return false")
+   assert(type(msg) == "table", "Internal errors should return tables")
+   assert(type(msg.msg) == "string", "Internal errors should have string messages")
+   assert(msg.msg:match("Argh"), "Expected error should be passed through")
+   assert(msg.words[1] == 2, "Error words should be offset by 2")
+end
+
+function suite.compile_builtin_define_ok()
+   local function _fish()
+      return {
+	 JEFF = true
+      }
+   end
+   local compctx = {[".lace"] = { controltype = { fish = _fish }}}
+   local cmdtab, msg = builtin.commands.define(compctx, "define", "fish", "fish")
+   assert(type(cmdtab) == "table", "Successful compilation returns tables")
+   assert(type(cmdtab.fn) == "function", "With functions")
+   local ectx = {}
+   local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
+   assert(ok, "Running a define should work")
+   assert(ectx[".lace"].defs.fish.JEFF, "definition should have passed through")
+end
 
 local count_ok = 0
 for _, testname in ipairs(testnames) do
