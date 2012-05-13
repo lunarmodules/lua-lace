@@ -101,6 +101,7 @@ local function internal_compile_ruleset(compcontext, sourcename, content)
 	 if type(rule) ~= "table" then
 	    return rule, (rule == nil) and msg or _normalise_error(compcontext, msg)
 	 end
+	 rule.linenr = i
 	 ruleset.rules[#ruleset.rules+1] = rule
       end
    end
