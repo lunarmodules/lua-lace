@@ -13,8 +13,11 @@ distclean: clean
 .PHONY: test
 test:
 	@$(RM) luacov.stats.out
-	@for MOD in $(TEST_MODULES); do \
+	@ERR=0; \
+	for MOD in $(TEST_MODULES); do \
 		echo "$${MOD}:"; \
 		$(LUA) test/test-$${MOD}.lua; \
-	done
-	@$(LUA) extras/luacov/src/bin/luacov -X test. $(TEST_MODULES)
+		test "x$$?" = "x0" || ERR=1; \
+	done; \
+	$(LUA) extras/luacov/src/bin/luacov -X test. $(TEST_MODULES); \
+	exit $$ERR
