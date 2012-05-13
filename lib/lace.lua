@@ -9,8 +9,10 @@
 
 local lex = require "lace.lex"
 local compiler = require "lace.compiler"
+local builtin = require "lace.builtin"
 
 return {
    lex = lex,
    compiler = compiler,
+   builtin = builtin,
 }
