@@ -80,6 +80,9 @@ local comp_context = {
 		  fh:close()
 		  return "real-" .. name, content
 	       end,
+      commands = {
+	 DISABLEDCOMMAND = false,
+      },
    },
 }
 
@@ -99,6 +102,18 @@ function suite.load_file_with_no_rules()
    local result, msg = compiler.compile(comp_context, "nothing")
    assert(type(result) == "table", "Loading a ruleset should result in a table")
    assert(#result.rules == 0, "There should be no rules present")
+end
+
+function suite.load_file_with_bad_command()
+   local result, msg = compiler.compile(comp_context, "badcommand")
+   assert(result == false, "Internal errors should return false")
+   assert(msg:match("BADCOMMAND"), "Error returned did not match the bad command")
+end
+
+function suite.load_file_with_disabled_command()
+   local result, msg = compiler.compile(comp_context, "disabledcommand")
+   assert(result == false, "Internal errors should return false")
+   assert(msg:match("is disabled by"), "Error returned did not match the bad command")
 end
 
 local count_ok = 0
