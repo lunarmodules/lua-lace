@@ -61,6 +61,71 @@ function suite.run_builtin_allow_deny_novariables()
    assert(msg == "because", "Expected reason should be 'because'")
 end
 
+function suite.compile_builtin_default_noresult()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.default(compctx, "default")
+   assert(cmdtab == false, "Internal errors should return false")
+   assert(type(msg) == "table", "Internal errors should return tables")
+   assert(type(msg.msg) == "string", "Internal errors should have string messages")
+   assert(msg.msg:match("Expected result"), "Expected error should mention a lack of result")
+end
+
+function suite.compile_builtin_default_resultbad()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.default(compctx, "default", "FISH")
+   assert(cmdtab == false, "Internal errors should return false")
+   assert(type(msg) == "table", "Internal errors should return tables")
+   assert(type(msg.msg) == "string", "Internal errors should have string messages")
+   assert(msg.msg:match("allow or deny"), "Expected error should mention a bad of result")
+end
+
+function suite.compile_builtin_default_extra_fluff()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.default(compctx, "default", "allow", "", "unwanted")
+   assert(cmdtab == false, "Internal errors should return false")
+   assert(type(msg) == "table", "Internal errors should return tables")
+   assert(type(msg.msg) == "string", "Internal errors should have string messages")
+   assert(msg.msg:match("additional"), "Expected error should mention additional content")
+end
+
+function suite.compile_builtin_default_ok()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.default(compctx, "default", "allow", "because")
+   assert(type(cmdtab) == "table", "Successful compilation should return a table")
+   assert(type(cmdtab.fn) == "function", "With a function")
+   assert(type(cmdtab.args) == "table", "And an arg table")
+   assert(cmdtab.fn() == true, "Default command should always return true")
+   assert(type(compctx[".lace"].default) == "table", "Default should always set up the context")
+   assert(#compctx[".lace"].default == 2, "Default table should consist of two entries")
+   assert(compctx[".lace"].default[1] == "allow", "First entry should be the result")
+   assert(compctx[".lace"].default[2] == "because", "Second entry should be the reason")
+end
+
+function suite.compile_builtin_default_twice()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.default(compctx, "default", "allow", "")
+   assert(type(cmdtab) == "table", "Successful compilation should return a table")
+   local cmdtab, msg = builtin.commands.default(compctx, "default", "allow", "")
+   assert(cmdtab == false, "Internal errors should return false")
+   assert(type(msg) == "table", "Internal errors should return tables")
+   assert(type(msg.msg) == "string", "Internal errors should have string messages")
+   assert(msg.msg:match("change the"), "Expected error should mention changing the default")
+end
+
+function suite.compile_builtin_default_noreason()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.default(compctx, "default", "allow")
+   assert(type(cmdtab) == "table", "Successful compilation should return a table")
+   assert(type(cmdtab.fn) == "function", "With a function")
+   assert(type(cmdtab.args) == "table", "And an arg table")
+   assert(cmdtab.fn() == true, "Default command should always return true")
+   assert(type(compctx[".lace"].default) == "table", "Default should always set up the context")
+   assert(#compctx[".lace"].default == 2, "Default table should consist of two entries")
+   assert(compctx[".lace"].default[1] == "allow", "First entry should be the result")
+   assert(compctx[".lace"].default[2] == "Default behaviour", "Second entry should be the reason")
+end
+
+
 local count_ok = 0
 for _, testname in ipairs(testnames) do
    print("Run: " .. testname)
