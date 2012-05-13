@@ -116,6 +116,12 @@ function suite.load_file_with_disabled_command()
    assert(msg:match("is disabled by"), "Error returned did not match the bad command")
 end
 
+function suite.load_file_with_bad_deny_command()
+   local result, msg = compiler.compile(comp_context, "denynoreason")
+   assert(result == false, "Internal errors should return false")
+   assert(msg:match("got nothing"), "Error returned did not match expected behaviour from deny")
+end
+
 function suite.load_file_with_one_command()
    local result, msg = compiler.compile(comp_context, "denyall")
    assert(type(result) == "table", "Loading a ruleset should result in a table")
