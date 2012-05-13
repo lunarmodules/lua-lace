@@ -248,24 +248,6 @@ function suite.escape_inside_unclosed_unused()
    assert(content.lines[1].warnings[2]:find("escape"), "The warning should be about the escape")
 end
 
-function suite.load_unknown_file()
-   local ok, msg = lex.file("test/NOT-PRESENT")
-   assert(not ok, "Managed to lex a non-present file?!")
-   assert(msg:match 'Unable to open', "Error doesn't seem right")
-end
-
-function suite.load_known_file()
-   local content = assert(lex.file("test/test-lace.lex.rules"))
-   assert(content.source == "@test/test-lace.lex.rules")
-   assert(type(content.lines) == "table", "Lines is not a table")
-   assert(#content.lines == 5, "There should have been five lines")
-   assert(content.lines[1].type == "comment", "Line 1 should be a comment")
-   assert(content.lines[2].type == "comment", "Line 2 should be a comment")
-   assert(content.lines[3].type == "comment", "Line 3 should be a comment")
-   assert(content.lines[4].type == "whitespace", "Line 3 should be whitespace")
-   assert(content.lines[5].type == "rule", "Line 3 should be a rule")
-end
-
 local count_ok = 0
 for _, testname in ipairs(testnames) do
    print("Run: " .. testname)

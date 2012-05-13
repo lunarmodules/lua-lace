@@ -110,17 +110,6 @@ local function lex_a_ruleset(ruleset, sourcename)
    return ret
 end
 
-local function lex_a_file(filename)
-   local fh, err = sio.open(filename, "r")
-   if not fh then
-      return nil, "Unable to open " .. tostring(filename) .. ": " .. tostring(err)
-   end
-   local ruleset = fh:read("*a")
-   fh:close()
-   return lex_a_ruleset(ruleset, "@" .. filename)
-end
-
 return {
-   file = lex_a_file,
    string = lex_a_ruleset,
 }
