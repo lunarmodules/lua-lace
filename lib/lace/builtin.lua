@@ -81,7 +81,7 @@ function builtin.default(compcontext, def, result, reason, unwanted)
       return compiler().error("Cannot change the default")
    end
 
-   compcontext[".lace"].default = { result, reason }
+   compcontext[".lace"].default = _return(compcontext, result, reason)
 
    return {
       fn = function() return true end,

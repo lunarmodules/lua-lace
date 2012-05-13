@@ -135,9 +135,7 @@ function suite.compile_builtin_default_ok()
    assert(type(cmdtab.args) == "table", "And an arg table")
    assert(cmdtab.fn() == true, "Default command should always return true")
    assert(type(compctx[".lace"].default) == "table", "Default should always set up the context")
-   assert(#compctx[".lace"].default == 2, "Default table should consist of two entries")
-   assert(compctx[".lace"].default[1] == "allow", "First entry should be the result")
-   assert(compctx[".lace"].default[2] == "because", "Second entry should be the reason")
+   assert(type(compctx[".lace"].default.fn) == "function", "Default table should have a function like a rule")
 end
 
 function suite.compile_builtin_default_twice()
@@ -159,9 +157,7 @@ function suite.compile_builtin_default_noreason()
    assert(type(cmdtab.args) == "table", "And an arg table")
    assert(cmdtab.fn() == true, "Default command should always return true")
    assert(type(compctx[".lace"].default) == "table", "Default should always set up the context")
-   assert(#compctx[".lace"].default == 2, "Default table should consist of two entries")
-   assert(compctx[".lace"].default[1] == "allow", "First entry should be the result")
-   assert(compctx[".lace"].default[2] == "Default behaviour", "Second entry should be the reason")
+   assert(type(compctx[".lace"].default.fn) == "function", "Default table should have a function like a rule")
 end
 
 
