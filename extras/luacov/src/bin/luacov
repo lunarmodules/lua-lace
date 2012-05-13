@@ -68,6 +68,7 @@ local exclusions =
 {
    { false, "^#!" },     -- Unix hash-bang magic line
    { true, "" },         -- Empty line
+   { true, "}" },        -- Just a close-brace
    { true, "end,?" },    -- Single "end"
    { true, "else" },     -- Single "else"
    { true, "repeat" },   -- Single "repeat"
