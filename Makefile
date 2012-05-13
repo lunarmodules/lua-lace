@@ -21,3 +21,7 @@ test:
 	done; \
 	$(LUA) extras/luacov/src/bin/luacov -X test. $(TEST_MODULES); \
 	exit $$ERR
+
+.PHONY: interactive
+interactive:
+	$(LUA) -e'lace=require"lace"' -i
