@@ -248,6 +248,18 @@ function suite.escape_inside_unclosed_unused()
    assert(content.lines[1].warnings[2]:find("escape"), "The warning should be about the escape")
 end
 
+function suite.empty_string_words_work()
+   local content = assert(lex.string("allow ''", "SRC"))
+   assert(content.source == "SRC", "Source name not propagated")
+   assert(type(content.lines) == "table", "Lines is not a table")
+   assert(#content.lines == 1, "There should have been one line")
+   assert(#content.lines[1].content == 2, "The line should have 2 words")
+   assert(content.lines[1].content[1].spos == 1, "The first word starts at the first character")
+   assert(content.lines[1].content[1].str == "allow", "The word is \"allow\"")
+   assert(content.lines[1].content[2].str == "", "The second word is empty")
+   assert(content.lines[1].content[2].spos == 7, "The empty word starts at the seventh character")
+end
+
 local count_ok = 0
 for _, testname in ipairs(testnames) do
    print("Run: " .. testname)

@@ -15,6 +15,7 @@ local function lex_one_line(line)
    local c
    local escaping = false
    local quoting = false
+   local force_empty = false
    local spos, cpos = 1, 0
    while #line > 0 do
       c, line = line:match("^(.)(.*)$")
@@ -36,9 +37,11 @@ local function lex_one_line(line)
 	 if c == "'" and quoting == false then
 	    -- Start single quotes
 	    quoting = c
+	    force_empty = true
 	 elseif c == '"' and quoting == false then
 	    -- Start double quotes
 	    quoting = c
+	    force_empty = true
 	 elseif c == "'" and quoting == c then
 	    -- End single quotes
 	    quoting = false
@@ -53,9 +56,10 @@ local function lex_one_line(line)
 	    acc = acc .. c
 	 elseif c == " " or c == "\t" then
 	    -- A space (or tab) and not quoting, so clear the accumulator
-	    if acc ~= "" then
+	    if acc ~= "" or force_empty then
 	       r[#r+1] = { spos = spos, epos = cpos - 1, str = acc }
 	       spos = cpos + 1
+	       force_empty = false
 	    elseif cpos == spos then
 	       -- Increment the start position since we've not found a word yet
 	       spos = spos + 1
@@ -66,7 +70,7 @@ local function lex_one_line(line)
 	 end
       end
    end
-   if acc ~= "" then
+   if acc ~= "" or force_empty then
       r[#r+1] = { spos = spos, epos = cpos, str = acc }
    end
 
