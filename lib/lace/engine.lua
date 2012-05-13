@@ -21,7 +21,7 @@ local function set_define(exec_context, name, defn)
    local dlace = _dlace(exec_context)
    dlace.defs = dlace.defs or {}
    if dlace.defs[name] then
-      return false, _error("Attempted to redefine " .. name)
+      return false, _error("Attempted to redefine " .. name, {2})
    end
    dlace.defs[name] = defn
    return true
