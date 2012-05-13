@@ -54,7 +54,7 @@ local function lex_one_line(line)
 	 elseif c == " " or c == "\t" then
 	    -- A space (or tab) and not quoting, so clear the accumulator
 	    if acc ~= "" then
-	       r[#r+1] = { spos, acc, pos = spos, str = acc }
+	       r[#r+1] = { spos = spos, epos = cpos - 1, str = acc }
 	       spos = cpos + 1
 	    elseif cpos == spos then
 	       -- Increment the start position since we've not found a word yet
@@ -67,7 +67,7 @@ local function lex_one_line(line)
       end
    end
    if acc ~= "" then
-      r[#r+1] = { spos, acc, pos = spos, str = acc }
+      r[#r+1] = { spos = spos, epos = cpos, str = acc }
    end
 
    local warnings = {}
@@ -76,9 +76,6 @@ local function lex_one_line(line)
    end
    if escaping then
       warnings[#warnings+1] = "Un-used escape at end"
-   end
-   if #r == 0 then
-      warnings[#warnings+1] = "No command found?"
    end
 
    return r, warnings
@@ -120,7 +117,7 @@ local function lex_a_file(filename)
    end
    local ruleset = fh:read("*a")
    fh:close()
-   return lex_a_string(ruleset, "@" .. filename)
+   return lex_a_ruleset(ruleset, "@" .. filename)
 end
 
 return {
