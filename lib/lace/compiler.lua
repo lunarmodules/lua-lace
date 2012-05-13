@@ -8,8 +8,7 @@
 --
 
 local lex = require "lace.lex"
-
-local builtin_commands = {}
+local builtin = require "lace.builtin"
 
 local function _error(str, words)
    return false, { msg = str, words = words }
@@ -36,7 +35,7 @@ local function _command(ctx, name)
    local cmdtab = ctx[".lace"].commands or {}
    local cfn = cmdtab[name]
    if cfn == nil then
-      cfn = builtin_commands[name]
+      cfn = builtin.commands[name]
    elseif cfn == false then
       cfn = _fake_command
    end
