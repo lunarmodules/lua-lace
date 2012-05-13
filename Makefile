@@ -1,6 +1,6 @@
 all: test
 
-TEST_MODULES := lace.lex lace.compiler
+TEST_MODULES := lace lace.lex lace.compiler
 
 LUA := LUA_PATH="$(shell pwd)/lib/?.lua;$(shell pwd)/extras/luacov/src/?.lua;$(HOME)/dev-bzr/luxio/?.lua;;" LUA_CPATH="$(HOME)/dev-bzr/luxio/?.so;;" lua5.1
 
