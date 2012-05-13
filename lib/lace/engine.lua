@@ -78,6 +78,7 @@ local function run_ruleset(ruleset, exec_context)
 end
 
 return {
+   internal_run = internal_run_ruleset,
    run = run_ruleset,
    test = test_define,
    define = set_define,
