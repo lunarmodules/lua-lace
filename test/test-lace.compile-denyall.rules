@@ -1,0 +1,4 @@
+-- This ruleset consists of a single statement to deny
+-- everything.
+
+deny "Sorry"

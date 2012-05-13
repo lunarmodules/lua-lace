@@ -116,6 +116,16 @@ function suite.load_file_with_disabled_command()
    assert(msg:match("is disabled by"), "Error returned did not match the bad command")
 end
 
+function suite.load_file_with_one_command()
+   local result, msg = compiler.compile(comp_context, "denyall")
+   assert(type(result) == "table", "Loading a ruleset should result in a table")
+   assert(#result.rules == 1, "There should be one rule present")
+   local rule = result.rules[1]
+   assert(type(rule) == "table", "Rules should be tables")
+   assert(type(rule.fn) == "function", "Rules should have functions")
+   assert(type(rule.args) == "table", "Rules should have arguments")
+end
+
 local count_ok = 0
 for _, testname in ipairs(testnames) do
    print("Run: " .. testname)
