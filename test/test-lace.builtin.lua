@@ -61,6 +61,28 @@ function suite.run_builtin_allow_deny_novariables()
    assert(msg == "because", "Expected reason should be 'because'")
 end
 
+function suite.builtin_get_set_unconditional()
+   builtin.get_set_last_unconditional_result("FOO")
+   assert(builtin.get_set_last_unconditional_result() == "FOO",
+	  "Result not saved")
+end
+
+function suite.run_builtin_allow_deny_unconditional_saved()
+   -- Clear
+   builtin.get_set_last_unconditional_result()
+
+   local cmdtab, msg = builtin.commands.allow({}, "allow", "because")
+   assert(type(cmdtab) == "table", "Result should be a table")
+   assert(type(cmdtab.fn) == "function", "Result should contain a function")
+   assert(type(cmdtab.args) == "table", "Result table should contain an args table")
+   local result, msg = cmdtab.fn({}, unpack(cmdtab.args))
+   assert(result == "allow", "Expected result should be 'allow'")
+   assert(msg == "because", "Expected reason should be 'because'")
+
+   local last = builtin.get_set_last_unconditional_result()
+   assert(last == "allow", "The last unconditional result was not allow?")
+end
+
 function suite.compile_builtin_default_noresult()
    local compctx = {[".lace"] = {}}
    local cmdtab, msg = builtin.commands.default(compctx, "default")

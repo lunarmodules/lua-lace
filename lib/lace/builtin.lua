@@ -15,6 +15,14 @@ end
 
 --[ Allow and Deny ]------------------------------------------------
 
+local unconditional_result = nil
+
+local function get_set_last_unconditional_result(newv)
+   local ret = unconditional_result
+   unconditional_result = newv
+   return ret
+end
+
 local function _do_return(exec_context, result, reason, cond)
    if #cond > 0 then
       -- Run the conditions
@@ -29,13 +37,15 @@ local function _return(compcontext, result, reason, ...)
    if type(reason) ~= "string" then
       return compiler().error("Expected reason, got nothing")
    end
+
+   local cond = {...}
+   if #cond == 0 then
+      unconditional_result = result
+   end
+
    return {
       fn = _do_return,
-      args = {
-	 result,
-	 reason,
-	 {...}
-      }
+      args = { result, reason, cond }
    }
 end
 
@@ -73,4 +83,5 @@ end
 
 return {
    commands = builtin,
+   get_set_last_unconditional_result = get_set_last_unconditional_result,
 }
