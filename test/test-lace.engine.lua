@@ -13,8 +13,6 @@ local luacov = require 'luacov'
 
 local lace = require 'lace'
 
-local sio = require 'luxio.simple'
-
 local testnames = {}
 
 local function add_test(suite, name, value)
@@ -109,7 +107,7 @@ local comp_context = {
 		  if name == "THROW_ERROR" then
 		     error("THROWN")
 		  end
-		  local fh, msg = sio.open("test/test-lace.engine-" .. name .. ".rules", "r")
+		  local fh = io.open("test/test-lace.engine-" .. name .. ".rules", "r")
 		  if not fh then
 		     return compiler.error("LOADER: Unknown: " .. name, {1})
 		  end

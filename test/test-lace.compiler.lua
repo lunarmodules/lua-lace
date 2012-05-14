@@ -12,7 +12,6 @@
 local luacov = require 'luacov'
 
 local compiler = require 'lace.compiler'
-local sio = require 'luxio.simple'
 
 local testnames = {}
 
@@ -121,7 +120,7 @@ local comp_context = {
 		  if name == "THROW_ERROR" then
 		     error("THROWN")
 		  end
-		  local fh, msg = sio.open("test/test-lace.compile-" .. name .. ".rules", "r")
+		  local fh = io.open("test/test-lace.compile-" .. name .. ".rules", "r")
 		  if not fh then
 		     return compiler.error("LOADER: Unknown: " .. name, {1})
 		  end
