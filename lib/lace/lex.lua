@@ -7,8 +7,6 @@
 -- For Licence terms, see COPYING
 --
 
-local sio = require "luxio.simple"
-
 local function lex_one_line(line)
    local r = {}
    local acc = ""
