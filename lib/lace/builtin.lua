@@ -15,7 +15,8 @@ local function compiler()
    return require "lace.compiler"
 end
 
-local function run_conditions(exec_context, cond)
+local function run_conditions(exec_context, cond, anyof)
+   local anymet = false
    for i = 1, #cond do
       local name = cond[i]
       local invert = false
@@ -32,10 +33,17 @@ local function run_conditions(exec_context, cond)
       end
       if not res then
 	 -- condition failed
-	 return false
+	 if not anyof then
+	    return false
+	 end
+      else
+	 anymet = true
       end
    end
    -- conditions passed
+   if anyof then
+      return anymet
+   end
    return true
 end
 
@@ -121,11 +129,36 @@ function builtin.default(compcontext, def, result, reason, unwanted)
    }
 end
 
+--[ Control types ]--------------------------------------------------
+
+local function _compile_any_all_of(compcontext, mtype, first, second, ...)
+   if type(first) ~= "string" then
+      return compiler().error("Expected at least two names, got none")
+   end
+   if type(second) ~= "string" then
+      return compiler().error("Expected at least two names, only got one")
+   end
+
+   return {
+      fn = run_conditions,
+      args = { { first, second, ...}, mtype == "anyof" }
+   }
+end
+
+local builtin_control_fn = {
+   anyof = _compile_any_all_of,
+   allof = _compile_any_all_of
+}
+
 --[ Definitions ]----------------------------------------------------
 
 local function _controlfn(ctx, name)
    local ctt = ctx[".lace"].controltype or {}
-   return ctt[name]
+   local cfn = ctt[name]
+   if cfn == nil then
+      cfn = builtin_control_fn[name]
+   end
+   return cfn
 end
 
 function builtin.define(compcontext, define, name, controltype, ...)

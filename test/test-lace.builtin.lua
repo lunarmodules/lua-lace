@@ -12,6 +12,7 @@
 local luacov = require 'luacov'
 
 local builtin = require 'lace.builtin'
+local engine = require 'lace.engine'
 
 local testnames = {}
 
@@ -485,6 +486,125 @@ function suite.run_cond_include_present_passing()
    local result, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
    assert(result == "allow", "Should propagate success")
    assert(msg == "because", "Should propagate reason")
+end
+
+function suite.compile_anyof_no_args()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.define(compctx, "define", "foo", "anyof")
+   assert(cmdtab == false, "Internal errors should return false")
+   assert(type(msg) == "table", "Internal errors should be tables")
+   assert(msg.msg:match(", got none"), "Error should mention that there were no args")
+end
+
+function suite.compile_allof_no_args()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.define(compctx, "define", "foo", "allof")
+   assert(cmdtab == false, "Internal errors should return false")
+   assert(type(msg) == "table", "Internal errors should be tables")
+   assert(msg.msg:match(", got none"), "Error should mention that there were no args")
+end
+
+function suite.compile_anyof_one_args()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.define(compctx, "define", "foo", "anyof", "foo")
+   assert(cmdtab == false, "Internal errors should return false")
+   assert(type(msg) == "table", "Internal errors should be tables")
+   assert(msg.msg:match(", only got one"), "Error should mention that there was only one arg")
+end
+
+function suite.compile_allof_one_args()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.define(compctx, "define", "foo", "allof", "foo")
+   assert(cmdtab == false, "Internal errors should return false")
+   assert(type(msg) == "table", "Internal errors should be tables")
+   assert(msg.msg:match(", only got one"), "Error should mention that there was only one arg")
+end
+
+
+function suite.compile_anyof_two_args()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.define(compctx, "define", "foo", "anyof", "foo", "bar")
+   assert(type(cmdtab) == "table", "Successful compilations should return tables")
+   assert(type(cmdtab.fn) == "function", "With functions")
+   assert(type(cmdtab.args) == "table", "And arguments")
+   assert(#cmdtab.args == 2, "There should be two args")
+   assert(type(cmdtab.args[1]) == "string", "The first should be a table")
+   assert(type(cmdtab.args[2]) == "table", "The second should be a bool")
+   local ctrltab = cmdtab.args[2]
+   assert(type(ctrltab) == "table", "Successfully compiled control functions should return tables")
+   assert(type(ctrltab.fn) == "function", "With functions")
+   assert(type(ctrltab.args) == "table", "And arguments")
+   assert(#ctrltab.args == 2, "There should be two args")
+   assert(type(ctrltab.args[1]) == "table", "The first should be a table")
+   assert(type(ctrltab.args[2]) == "boolean", "The second should be a bool")
+   assert(ctrltab.args[2] == true, "The anyof indicator should be true")
+end
+
+function suite.compile_allof_two_args()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.define(compctx, "define", "foo", "allof", "foo", "bar")
+   assert(type(cmdtab) == "table", "Successful compilations should return tables")
+   assert(type(cmdtab.fn) == "function", "With functions")
+   assert(type(cmdtab.args) == "table", "And arguments")
+   assert(#cmdtab.args == 2, "There should be two args")
+   assert(type(cmdtab.args[1]) == "string", "The first should be a table")
+   assert(type(cmdtab.args[2]) == "table", "The second should be a bool")
+   local ctrltab = cmdtab.args[2]
+   assert(type(ctrltab) == "table", "Successfully compiled control functions should return tables")
+   assert(type(ctrltab.fn) == "function", "With functions")
+   assert(type(ctrltab.args) == "table", "And arguments")
+   assert(#ctrltab.args == 2, "There should be two args")
+   assert(type(ctrltab.args[1]) == "table", "The first should be a table")
+   assert(type(ctrltab.args[2]) == "boolean", "The second should be a bool")
+   assert(ctrltab.args[2] == false, "The anyof indicator should be false")
+end
+
+function suite.run_anyof_two_args()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.define(compctx, "define", "jeff", "anyof", "foo", "bar")
+   assert(type(cmdtab) == "table", "Successful compilations should return tables")
+   local ectx = {
+      [".lace"] = {
+	 defs = {
+	    foo = {
+	       fn = function() return true end,
+	       args = {}
+	    },
+	    bar = {
+	       fn = function() return false end,
+	       args = {}
+	    }
+	 }
+      }
+   }
+   local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
+   assert(ok, "Running a define should work")
+   assert(ectx[".lace"].defs.foo.fn, "definition should have passed through")
+   assert(engine.test(ectx, "jeff"), "Any of true,false should be true")
+end
+
+function suite.run_anyof_two_args()
+   local compctx = {[".lace"] = {}}
+   local cmdtab, msg = builtin.commands.define(compctx, "define", "jeff", "allof", "foo", "bar")
+   assert(type(cmdtab) == "table", "Successful compilations should return tables")
+   local ectx = {
+      [".lace"] = {
+	 defs = {
+	    foo = {
+	       fn = function() return true end,
+	       args = {}
+	    },
+	    bar = {
+	       fn = function() return false end,
+	       args = {}
+	    }
+	 }
+      }
+   }
+   local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
+   assert(ok, "Running a define should work")
+   assert(ectx[".lace"].defs.foo.fn, "definition should have passed through")
+   assert(engine.test(ectx, "jeff") == false, "All of true,false should be false")
 end
 
 local count_ok = 0
