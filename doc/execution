@@ -3,7 +3,7 @@ Execution of Lace rulesets
 
 Once compiled, a ruleset is essentially a sequence of functions to
 call on the execution context.  The simplest execution context is an
-empty table.  If Lace is going to store anything it will use a ".lace"
+empty table.  If Lace is going to store anything it will use a "_lace"
 prefix as with compilation contexts.
 
 A few important functions make up the execution engine.  The top level

@@ -102,7 +102,7 @@ function suite.run_builtin_allow_deny_conditional_saved()
 end
 
 function suite.compile_builtin_default_noresult()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.default(compctx, "default")
    assert(cmdtab == false, "Internal errors should return false")
    assert(type(msg) == "table", "Internal errors should return tables")
@@ -111,7 +111,7 @@ function suite.compile_builtin_default_noresult()
 end
 
 function suite.compile_builtin_default_resultbad()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.default(compctx, "default", "FISH")
    assert(cmdtab == false, "Internal errors should return false")
    assert(type(msg) == "table", "Internal errors should return tables")
@@ -120,7 +120,7 @@ function suite.compile_builtin_default_resultbad()
 end
 
 function suite.compile_builtin_default_extra_fluff()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.default(compctx, "default", "allow", "", "unwanted")
    assert(cmdtab == false, "Internal errors should return false")
    assert(type(msg) == "table", "Internal errors should return tables")
@@ -129,18 +129,18 @@ function suite.compile_builtin_default_extra_fluff()
 end
 
 function suite.compile_builtin_default_ok()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.default(compctx, "default", "allow", "because")
    assert(type(cmdtab) == "table", "Successful compilation should return a table")
    assert(type(cmdtab.fn) == "function", "With a function")
    assert(type(cmdtab.args) == "table", "And an arg table")
    assert(cmdtab.fn() == true, "Default command should always return true")
-   assert(type(compctx[".lace"].default) == "table", "Default should always set up the context")
-   assert(type(compctx[".lace"].default.fn) == "function", "Default table should have a function like a rule")
+   assert(type(compctx._lace.default) == "table", "Default should always set up the context")
+   assert(type(compctx._lace.default.fn) == "function", "Default table should have a function like a rule")
 end
 
 function suite.compile_builtin_default_twice()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.default(compctx, "default", "allow", "")
    assert(type(cmdtab) == "table", "Successful compilation should return a table")
    local cmdtab, msg = builtin.commands.default(compctx, "default", "allow", "")
@@ -151,18 +151,18 @@ function suite.compile_builtin_default_twice()
 end
 
 function suite.compile_builtin_default_noreason()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.default(compctx, "default", "allow")
    assert(type(cmdtab) == "table", "Successful compilation should return a table")
    assert(type(cmdtab.fn) == "function", "With a function")
    assert(type(cmdtab.args) == "table", "And an arg table")
    assert(cmdtab.fn() == true, "Default command should always return true")
-   assert(type(compctx[".lace"].default) == "table", "Default should always set up the context")
-   assert(type(compctx[".lace"].default.fn) == "function", "Default table should have a function like a rule")
+   assert(type(compctx._lace.default) == "table", "Default should always set up the context")
+   assert(type(compctx._lace.default.fn) == "function", "Default table should have a function like a rule")
 end
 
 function suite.compile_builtin_define_noname()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.define(compctx, "define")
    assert(cmdtab == false, "Internal errors should return false")
    assert(type(msg) == "table", "Internal errors should return tables")
@@ -171,7 +171,7 @@ function suite.compile_builtin_define_noname()
 end
 
 function suite.compile_builtin_define_badname()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.define(compctx, "define", "!fish")
    assert(cmdtab == false, "Internal errors should return false")
    assert(type(msg) == "table", "Internal errors should return tables")
@@ -180,7 +180,7 @@ function suite.compile_builtin_define_badname()
 end
 
 function suite.compile_builtin_define_noctype()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.define(compctx, "define", "fish")
    assert(cmdtab == false, "Internal errors should return false")
    assert(type(msg) == "table", "Internal errors should return tables")
@@ -189,7 +189,7 @@ function suite.compile_builtin_define_noctype()
 end
 
 function suite.compile_builtin_define_badctype()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.define(compctx, "define", "fish", "fish")
    assert(cmdtab == false, "Internal errors should return false")
    assert(type(msg) == "table", "Internal errors should return tables")
@@ -201,7 +201,7 @@ function suite.compile_builtin_define_ctype_errors()
    local function _fish()
       return false, { msg = "Argh" }
    end
-   local compctx = {[".lace"] = { controltype = { fish = _fish }}}
+   local compctx = {_lace = { controltype = { fish = _fish }}}
    local cmdtab, msg = builtin.commands.define(compctx, "define", "fish", "fish")
    assert(cmdtab == false, "Internal errors should return false")
    assert(type(msg) == "table", "Internal errors should return tables")
@@ -213,7 +213,7 @@ function suite.compile_builtin_define_ctype_errors_offset()
    local function _fish()
       return false, { msg = "Argh", words = {0} }
    end
-   local compctx = {[".lace"] = { controltype = { fish = _fish }}}
+   local compctx = {_lace = { controltype = { fish = _fish }}}
    local cmdtab, msg = builtin.commands.define(compctx, "define", "fish", "fish")
    assert(cmdtab == false, "Internal errors should return false")
    assert(type(msg) == "table", "Internal errors should return tables")
@@ -228,18 +228,18 @@ function suite.compile_builtin_define_ok()
 	 JEFF = true
       }
    end
-   local compctx = {[".lace"] = { controltype = { fish = _fish }}}
+   local compctx = {_lace = { controltype = { fish = _fish }}}
    local cmdtab, msg = builtin.commands.define(compctx, "define", "fish", "fish")
    assert(type(cmdtab) == "table", "Successful compilation returns tables")
    assert(type(cmdtab.fn) == "function", "With functions")
    local ectx = {}
    local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
    assert(ok, "Running a define should work")
-   assert(ectx[".lace"].defs.fish.JEFF, "definition should have passed through")
+   assert(ectx._lace.defs.fish.JEFF, "definition should have passed through")
 end
 
 function suite.run_allow_deny_with_conditions_not_present()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.allow(compctx, "allow", "because", "cheese")
    assert(type(cmdtab) == "table", "Successful compilation returns tables")
    assert(type(cmdtab.fn) == "function", "With functions")
@@ -250,7 +250,7 @@ function suite.run_allow_deny_with_conditions_not_present()
 end
 
 function suite.run_allow_deny_with_condition_present_erroring()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.allow(compctx, "allow", "because", "cheese")
    assert(type(cmdtab) == "table", "Successful compilation returns tables")
    assert(type(cmdtab.fn) == "function", "With functions")
@@ -258,14 +258,14 @@ function suite.run_allow_deny_with_condition_present_erroring()
       fn = function() return nil, { msg = "CHEESE" } end,
       args = {}
    }
-   local ectx = {[".lace"] = {defs = { cheese = _cheesetab }}}
+   local ectx = {_lace = {defs = { cheese = _cheesetab }}}
    local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
    assert(ok == nil, "Running a conditional allow where the conditions error should fail")
    assert(msg.msg:match("CHEESE"), "Resultant error should be passed")
 end
 
 function suite.run_allow_deny_with_condition_present_failing()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.allow(compctx, "allow", "because", "cheese")
    assert(type(cmdtab) == "table", "Successful compilation returns tables")
    assert(type(cmdtab.fn) == "function", "With functions")
@@ -273,14 +273,14 @@ function suite.run_allow_deny_with_condition_present_failing()
       fn = function() return false end,
       args = {}
    }
-   local ectx = {[".lace"] = {defs = { cheese = _cheesetab }}}
+   local ectx = {_lace = {defs = { cheese = _cheesetab }}}
    local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
    assert(ok == true, "Running a conditional allow where the conditions fail should return continuation")
 end
 
 
 function suite.run_allow_deny_with_condition_present_passing()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.allow(compctx, "allow", "because", "cheese")
    assert(type(cmdtab) == "table", "Successful compilation returns tables")
    assert(type(cmdtab.fn) == "function", "With functions")
@@ -288,14 +288,14 @@ function suite.run_allow_deny_with_condition_present_passing()
       fn = function() return true end,
       args = {}
    }
-   local ectx = {[".lace"] = {defs = { cheese = _cheesetab }}}
+   local ectx = {_lace = {defs = { cheese = _cheesetab }}}
    local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
    assert(ok == "allow", "Running a conditional allow where the conditions pass should return allow")
    assert(msg == "because", "Resulting in the reason given")
 end
 
 function suite.run_allow_deny_with_inverted_condition_present_failing()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.allow(compctx, "allow", "because", "!cheese")
    assert(type(cmdtab) == "table", "Successful compilation returns tables")
    assert(type(cmdtab.fn) == "function", "With functions")
@@ -303,14 +303,14 @@ function suite.run_allow_deny_with_inverted_condition_present_failing()
       fn = function() return true end,
       args = {}
    }
-   local ectx = {[".lace"] = {defs = { cheese = _cheesetab }}}
+   local ectx = {_lace = {defs = { cheese = _cheesetab }}}
    local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
    assert(ok == true, "Running a conditional allow where the conditions fail should return continuation")
 end
 
 
 function suite.run_allow_deny_with_inverted_condition_present_passing()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.allow(compctx, "allow", "because", "!cheese")
    assert(type(cmdtab) == "table", "Successful compilation returns tables")
    assert(type(cmdtab.fn) == "function", "With functions")
@@ -318,14 +318,14 @@ function suite.run_allow_deny_with_inverted_condition_present_passing()
       fn = function() return false end,
       args = {}
    }
-   local ectx = {[".lace"] = {defs = { cheese = _cheesetab }}}
+   local ectx = {_lace = {defs = { cheese = _cheesetab }}}
    local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
    assert(ok == "allow", "Running a conditional allow where the conditions pass should return allow")
    assert(msg == "because", "Resulting in the reason given")
 end
 
 function suite.compile_include_statement_noname()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.include(compctx, "include")
    assert(cmdtab == false, "Internal errors should return false")
    assert(type(msg) == "table", "Internal errors should return tables")
@@ -334,7 +334,7 @@ function suite.compile_include_statement_noname()
 end
 
 function suite.compile_include_statement_noloader()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.include(compctx, "include", "fish")
    assert(cmdtab == false, "Internal errors should return false")
    assert(type(msg) == "table", "Internal errors should return tables")
@@ -343,7 +343,7 @@ function suite.compile_include_statement_noloader()
 end
 
 function suite.compile_safe_include_statement_noloader()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.include(compctx, "include?", "fish")
    assert(type(cmdtab) == "table", "Commands should be tables")
    assert(type(cmdtab.fn) == "function", "With a function")
@@ -354,7 +354,7 @@ function suite.compile_include_statement_withloader()
    local function _loader(cctx, name)
       return name, "-- nada\n"
    end
-   local compctx = {[".lace"] = {loader=_loader}}
+   local compctx = {_lace = {loader=_loader}}
    local cmdtab, msg = builtin.commands.include(compctx, "include", "fish")
    assert(type(cmdtab) == "table", "Commands should be tables")
    assert(type(cmdtab.fn) == "function", "With a function")
@@ -365,7 +365,7 @@ function suite.compile_include_statement_withloader_badcode()
    local function _loader(cctx, name)
       return name, "nada\n"
    end
-   local compctx = {[".lace"] = {loader=_loader}}
+   local compctx = {_lace = {loader=_loader}}
    local cmdtab, msg = builtin.commands.include(compctx, "include", "fish")
    assert(cmdtab == false, "Internal errors should return false")
    assert(type(msg) == "table", "Internal errors should return tables")
@@ -377,7 +377,7 @@ function suite.run_include_statement_withloader_good_code()
    local function _loader(cctx, name)
       return name, "--nada\n"
    end
-   local compctx = {[".lace"] = {loader=_loader}}
+   local compctx = {_lace = {loader=_loader}}
    local cmdtab, msg = builtin.commands.include(compctx, "include", "fish")
    assert(type(cmdtab) == "table", "Commands should be tables")
    assert(type(cmdtab.fn) == "function", "With a function")
@@ -391,7 +391,7 @@ function suite.run_include_statement_withloader_good_code_allow()
    local function _loader(cctx, name)
       return name, "allow because\n"
    end
-   local compctx = {[".lace"] = {loader=_loader}}
+   local compctx = {_lace = {loader=_loader}}
    local cmdtab, msg = builtin.commands.include(compctx, "include", "fish")
    assert(type(cmdtab) == "table", "Commands should be tables")
    assert(type(cmdtab.fn) == "function", "With a function")
@@ -406,7 +406,7 @@ function suite.run_cond_include_present_erroring()
    local function _loader(cctx, name)
       return name, "allow because\n"
    end
-   local compctx = {[".lace"] = {loader=_loader}}
+   local compctx = {_lace = {loader=_loader}}
    local cmdtab, msg = builtin.commands.include(compctx, "include", "fish", "cheese")
    assert(type(cmdtab) == "table", "Commands should be tables")
    assert(type(cmdtab.fn) == "function", "With a function")
@@ -421,13 +421,13 @@ function suite.run_cond_include_present_erroring()
    local function _loader(cctx, name)
       return name, "allow because\n"
    end
-   local compctx = {[".lace"] = {loader=_loader}}
+   local compctx = {_lace = {loader=_loader}}
    local cmdtab, msg = builtin.commands.include(compctx, "include", "fish", "cheese")
    assert(type(cmdtab) == "table", "Commands should be tables")
    assert(type(cmdtab.fn) == "function", "With a function")
    assert(type(cmdtab.args) == "table", "and arguments")
    local ectx = {
-      [".lace"] = {
+      _lace = {
 	 defs = {
 	    cheese = {
 	       fn = function() return nil, { msg = "FAIL" } end,
@@ -445,13 +445,13 @@ function suite.run_cond_include_present_failing()
    local function _loader(cctx, name)
       return name, "allow because\n"
    end
-   local compctx = {[".lace"] = {loader=_loader}}
+   local compctx = {_lace = {loader=_loader}}
    local cmdtab, msg = builtin.commands.include(compctx, "include", "fish", "cheese")
    assert(type(cmdtab) == "table", "Commands should be tables")
    assert(type(cmdtab.fn) == "function", "With a function")
    assert(type(cmdtab.args) == "table", "and arguments")
    local ectx = {
-      [".lace"] = {
+      _lace = {
 	 defs = {
 	    cheese = {
 	       fn = function() return false end,
@@ -468,13 +468,13 @@ function suite.run_cond_include_present_passing()
    local function _loader(cctx, name)
       return name, "allow because\n"
    end
-   local compctx = {[".lace"] = {loader=_loader}}
+   local compctx = {_lace = {loader=_loader}}
    local cmdtab, msg = builtin.commands.include(compctx, "include", "fish", "cheese")
    assert(type(cmdtab) == "table", "Commands should be tables")
    assert(type(cmdtab.fn) == "function", "With a function")
    assert(type(cmdtab.args) == "table", "and arguments")
    local ectx = {
-      [".lace"] = {
+      _lace = {
 	 defs = {
 	    cheese = {
 	       fn = function() return true end,
@@ -489,7 +489,7 @@ function suite.run_cond_include_present_passing()
 end
 
 function suite.compile_anyof_no_args()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.define(compctx, "define", "foo", "anyof")
    assert(cmdtab == false, "Internal errors should return false")
    assert(type(msg) == "table", "Internal errors should be tables")
@@ -497,7 +497,7 @@ function suite.compile_anyof_no_args()
 end
 
 function suite.compile_allof_no_args()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.define(compctx, "define", "foo", "allof")
    assert(cmdtab == false, "Internal errors should return false")
    assert(type(msg) == "table", "Internal errors should be tables")
@@ -505,7 +505,7 @@ function suite.compile_allof_no_args()
 end
 
 function suite.compile_anyof_one_args()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.define(compctx, "define", "foo", "anyof", "foo")
    assert(cmdtab == false, "Internal errors should return false")
    assert(type(msg) == "table", "Internal errors should be tables")
@@ -513,7 +513,7 @@ function suite.compile_anyof_one_args()
 end
 
 function suite.compile_allof_one_args()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.define(compctx, "define", "foo", "allof", "foo")
    assert(cmdtab == false, "Internal errors should return false")
    assert(type(msg) == "table", "Internal errors should be tables")
@@ -522,7 +522,7 @@ end
 
 
 function suite.compile_anyof_two_args()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.define(compctx, "define", "foo", "anyof", "foo", "bar")
    assert(type(cmdtab) == "table", "Successful compilations should return tables")
    assert(type(cmdtab.fn) == "function", "With functions")
@@ -541,7 +541,7 @@ function suite.compile_anyof_two_args()
 end
 
 function suite.compile_allof_two_args()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.define(compctx, "define", "foo", "allof", "foo", "bar")
    assert(type(cmdtab) == "table", "Successful compilations should return tables")
    assert(type(cmdtab.fn) == "function", "With functions")
@@ -560,11 +560,11 @@ function suite.compile_allof_two_args()
 end
 
 function suite.run_anyof_two_args()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.define(compctx, "define", "jeff", "anyof", "foo", "bar")
    assert(type(cmdtab) == "table", "Successful compilations should return tables")
    local ectx = {
-      [".lace"] = {
+      _lace = {
 	 defs = {
 	    foo = {
 	       fn = function() return true end,
@@ -579,16 +579,16 @@ function suite.run_anyof_two_args()
    }
    local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
    assert(ok, "Running a define should work")
-   assert(ectx[".lace"].defs.foo.fn, "definition should have passed through")
+   assert(ectx._lace.defs.foo.fn, "definition should have passed through")
    assert(engine.test(ectx, "jeff"), "Any of true,false should be true")
 end
 
 function suite.run_anyof_two_args()
-   local compctx = {[".lace"] = {}}
+   local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.define(compctx, "define", "jeff", "allof", "foo", "bar")
    assert(type(cmdtab) == "table", "Successful compilations should return tables")
    local ectx = {
-      [".lace"] = {
+      _lace = {
 	 defs = {
 	    foo = {
 	       fn = function() return true end,
@@ -603,7 +603,7 @@ function suite.run_anyof_two_args()
    }
    local ok, msg = cmdtab.fn(ectx, unpack(cmdtab.args))
    assert(ok, "Running a define should work")
-   assert(ectx[".lace"].defs.foo.fn, "definition should have passed through")
+   assert(ectx._lace.defs.foo.fn, "definition should have passed through")
    assert(engine.test(ectx, "jeff") == false, "All of true,false should be false")
 end
 

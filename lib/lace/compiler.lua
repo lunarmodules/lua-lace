@@ -26,13 +26,13 @@ local function _loader(ctx)
    -- We know the context is a table with a .lace table, so retrieve
    -- the loader function.  If it's absent, return a loader which
    -- fails due to no loader being present.
-   return ctx[".lace"].loader or _fake_loader
+   return ctx._lace.loader or _fake_loader
 end
 
 local function _command(ctx, name)
    -- While we know .lace is present, there's no guarantee they added
    -- any commands
-   local cmdtab = ctx[".lace"].commands or {}
+   local cmdtab = ctx._lace.commands or {}
    local cfn = cmdtab[name]
    if cfn == nil then
       cfn = builtin.commands[name]
@@ -48,8 +48,8 @@ local function _normalise_error(ctx, err)
 end
 
 local function _setposition(context, ruleset, linenr)
-   context[".lace"].source = (ruleset or {}).content
-   context[".lace"].linenr = linenr
+   context._lace.source = (ruleset or {}).content
+   context._lace.linenr = linenr
 end
 
 local function compile_one_line(compcontext, line)
@@ -71,7 +71,7 @@ end
 
 local function internal_compile_ruleset(compcontext, sourcename, content, suppress_default)
    assert(type(compcontext) == "table", "Compilation context must be a table")
-   assert(type(compcontext[".lace"]) == "table", "Compilation context must contain a .lace table")
+   assert(type(compcontext._lace) == "table", "Compilation context must contain a .lace table")
    assert(type(sourcename) == "string", "Source name must be a string")
    assert(content == nil or type(content) == "string", "Content must be nil or a string")
    if not content then
@@ -98,7 +98,7 @@ local function internal_compile_ruleset(compcontext, sourcename, content, suppre
    if not suppress_default then
       -- Ensure there's no default present before processing.
       -- We only suppress inside includes
-      compcontext[".lace"].default = nil
+      compcontext._lace.default = nil
    end
 
    for i = 1, #lexed_content.lines do
@@ -131,13 +131,13 @@ local function internal_compile_ruleset(compcontext, sourcename, content, suppre
    end
 
    if not suppress_default and not uncond then
-      if not compcontext[".lace"].default then
+      if not compcontext._lace.default then
 	 -- No default, fake one up
 	 builtin.commands.default(compcontext, "default",
 				  result == "allow" and "deny" or "allow")
       end
       -- Now, inject the default command at the end of the ruleset.
-      ruleset.rules[#ruleset.rules+1] = compcontext[".lace"].default
+      ruleset.rules[#ruleset.rules+1] = compcontext._lace.default
    end
 
    _setposition(compcontext)

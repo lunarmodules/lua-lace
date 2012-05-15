@@ -115,12 +115,12 @@ function builtin.default(compcontext, def, result, reason, unwanted)
       return compiler().error("Unexpected additional content", {4})
    end
 
-   if compcontext[".lace"].default then
+   if compcontext._lace.default then
       return compiler().error("Cannot change the default")
    end
    
    local uncond, last = unconditional_result, last_result
-   compcontext[".lace"].default = _return(compcontext, result, reason)
+   compcontext._lace.default = _return(compcontext, result, reason)
    unconditional_result, last_result = uncond, last
 
    return {
@@ -153,7 +153,7 @@ local builtin_control_fn = {
 --[ Definitions ]----------------------------------------------------
 
 local function _controlfn(ctx, name)
-   local ctt = ctx[".lace"].controltype or {}
+   local ctt = ctx._lace.controltype or {}
    local cfn = ctt[name]
    if cfn == nil then
       cfn = builtin_control_fn[name]

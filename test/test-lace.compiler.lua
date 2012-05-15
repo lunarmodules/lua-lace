@@ -35,37 +35,37 @@ function suite.context_missing_dot_lace()
 end
 
 function suite.context_dot_lace_not_table()
-   local result, msg = compiler.compile({[".lace"] = true}, "")
+   local result, msg = compiler.compile({_lace = true}, "")
    assert(result == nil, "Lua errors should return nil")
    assert(msg:match("context must contain"), "Supposed to whinge about context missing .lace")
 end
 
 function suite.source_not_string()
-   local result, msg = compiler.compile({[".lace"] = {}}, false)
+   local result, msg = compiler.compile({_lace = {}}, false)
    assert(result == nil, "Lua errors should return nil")
    assert(msg:match("name must be a string"), "Supposed to whinge about name not being a string")
 end
 
 function suite.content_not_string()
-   local result, msg = compiler.compile({[".lace"] = {}}, "", false)
+   local result, msg = compiler.compile({_lace = {}}, "", false)
    assert(result == nil, "Lua errors should return nil")
    assert(msg:match("must be nil or a string"), "Supposed to whinge about content not being a string but being non-nil")
 end
 
 function suite.empty_content_no_loader()
-   local result, msg = compiler.compile({[".lace"] = {}}, "", "")
+   local result, msg = compiler.compile({_lace = {}}, "", "")
    assert(result == false, "Internal errors should return false")
    assert(msg:match("whatsoever"), "Supposed to whinge about no allow/deny at all")
 end
 
 function suite.no_content_no_loader()
-   local result, msg = compiler.compile({[".lace"] = {}}, "")
+   local result, msg = compiler.compile({_lace = {}}, "")
    assert(result == false, "Internal errors should return false")
    assert(msg:match("Ruleset not found:"), "Supposed to whinge about ruleset not being found")
 end
 
 function suite.no_unconditional_action()
-   local result, msg = compiler.compile({[".lace"] = {}}, "", "deny stuff cond")
+   local result, msg = compiler.compile({_lace = {}}, "", "deny stuff cond")
    assert(type(result) == "table", "Loading a ruleset should result in a table")
    assert(#result.rules == 2, "There should be two rules present")
    local rule = result.rules[1]
@@ -81,7 +81,7 @@ function suite.no_unconditional_action()
 end
 
 function suite.no_unconditional_action_default_deny()
-   local result, msg = compiler.compile({[".lace"] = {}}, "", "default deny\ndeny stuff cond")
+   local result, msg = compiler.compile({_lace = {}}, "", "default deny\ndeny stuff cond")
    assert(type(result) == "table", "Loading a ruleset should result in a table")
    assert(#result.rules == 3, "There should be three rules present")
    local rule = result.rules[1]
@@ -97,7 +97,7 @@ function suite.no_unconditional_action_default_deny()
 end
 
 function suite.is_unconditional_action_default_deny()
-   local result, msg = compiler.compile({[".lace"] = {}}, "", "default deny\nallow stuff")
+   local result, msg = compiler.compile({_lace = {}}, "", "default deny\nallow stuff")
    assert(type(result) == "table", "Loading a ruleset should result in a table")
    assert(#result.rules == 2, "There should be two rules present")
    local rule = result.rules[1]
@@ -115,7 +115,7 @@ end
 -- Now we set up a more useful context and use that going forward:
 
 local comp_context = {
-   [".lace"] = {
+   _lace = {
       loader = function(ctx, name)
 		  if name == "THROW_ERROR" then
 		     error("THROWN")

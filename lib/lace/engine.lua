@@ -12,8 +12,8 @@ local function _error(str, words)
 end
 
 local function _dlace(ctx)
-   local ret = ctx[".lace"] or {}
-   ctx[".lace"] = ret
+   local ret = ctx._lace or {}
+   ctx._lace = ret
    return ret
 end
 

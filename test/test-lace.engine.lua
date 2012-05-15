@@ -67,7 +67,7 @@ function suite.check_bad_exec_fn_returns_nil()
    local function _explode()
       return { fn = function() error("EXPLODE") end, args = {} }
    end
-   local compctx = {[".lace"]={commands={explode=_explode}}}
+   local compctx = {_lace={commands={explode=_explode}}}
    local ruleset, msg = lace.compiler.compile(compctx, "src", "explode\nallow because")
    assert(type(ruleset) == "table", "Could not compile exploding ruleset")
    local execctx = {}
@@ -80,7 +80,7 @@ function suite.check_error_propagates()
    local function _explode()
       return { fn = function() return false, "EXPLODE" end, args = {} }
    end
-   local compctx = {[".lace"]={commands={explode=_explode}}}
+   local compctx = {_lace={commands={explode=_explode}}}
    local ruleset, msg = lace.compiler.compile(compctx, "src", "explode\nallow because")
    assert(type(ruleset) == "table", "Could not compile exploding ruleset")
    local execctx = {}
@@ -90,7 +90,7 @@ function suite.check_error_propagates()
 end
 
 function suite.check_deny_works()
-   local compctx = {[".lace"]={}}
+   local compctx = {_lace={}}
    local ruleset, msg = lace.compiler.compile(compctx, "src", "deny everything")
    assert(type(ruleset) == "table", "Could not compile exploding ruleset")
    local execctx = {}
@@ -102,7 +102,7 @@ end
 -- More complete engine tests from here
 
 local comp_context = {
-   [".lace"] = {
+   _lace = {
       loader = function(ctx, name)
 		  if name == "THROW_ERROR" then
 		     error("THROWN")

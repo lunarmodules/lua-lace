@@ -5,7 +5,7 @@ When you construct a Lace engine, you give it a compilation callback
 set.  That set is used to call you back when Lace encounters something it
 needs help compiling.  The structure of it is:
 
-{ [".lace"] = {
+{ _lace = {
    loader = function(compcontext, nametoload) ... end,
    commands = {
       ... = function(compcontext, words...) ... end,
@@ -15,18 +15,18 @@ needs help compiling.  The structure of it is:
    }
 } }
 
-Anything outside of the ".lace" entry in the context is considered
+Anything outside of the "_lace" entry in the context is considered
 fair game structure-wise and can be used by the functions called back
 to acquire internal pointers etc.  Note however that the compilation
 context will not be passed around during execution so if you need to
 remember some of it in order to function properly, then it's up to
-you.  Also note that anything not defined above in the ".lace" entry
+you.  Also note that anything not defined above in the "_lace" entry
 is considered "private" to Lace and should not be touched by non-Lace
 code.  Lace will usually be considerate and will not create arbitrary
 entries in that table which do not start with a dot.  This allows for
 forward/backward compatibility to some extent.
 
-In addition, Lace will maintain a 'source' entry in the .lace table
+In addition, Lace will maintain a 'source' entry in the _lace table
 with the lexed source which is being compiled and, if we're compiling
 an included source, a parent entry with the compilation context of the
 parent.  The toplevel field is the compilation context of the top
