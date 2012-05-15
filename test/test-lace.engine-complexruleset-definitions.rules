@@ -1,3 +1,6 @@
 define first equal state one
 define second equal state two
 define third equal state three
+
+define any_first_second_third anyof first second third
+define all_first_second_third allof first second third

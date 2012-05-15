@@ -10,9 +10,11 @@ default deny "four"
 
 include complexruleset-definitions
 
-allow one first
+allow one first any_first_second_third
 
 include complexruleset-allowsecond second
+
+allow whatever all_first_second_third
 
 deny three third
 
