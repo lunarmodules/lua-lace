@@ -1,6 +1,6 @@
 all: test
 
-TEST_MODULES := lace lace.lex lace.compiler
+TEST_MODULES := lace lace.lex lace.compiler lace.builtin lace.engine
 
 LUA := LUA_PATH="$(shell pwd)/lib/?.lua;$(shell pwd)/extras/luacov/src/?.lua;;" lua5.1
 
@@ -15,7 +15,7 @@ test:
 	@$(RM) luacov.stats.out
 	@ERR=0; \
 	for MOD in $(sort $(TEST_MODULES)); do \
-		echo "$${MOD}:"; \
+		echo -n "$${MOD}: "; \
 		$(LUA) test/test-$${MOD}.lua; \
 		test "x$$?" = "x0" || ERR=1; \
 	done; \

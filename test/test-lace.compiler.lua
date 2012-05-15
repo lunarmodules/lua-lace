@@ -182,7 +182,7 @@ end
 
 local count_ok = 0
 for _, testname in ipairs(testnames) do
-   print("Run: " .. testname)
+--   print("Run: " .. testname)
    local ok, err = xpcall(suite[testname], debug.traceback)
    if not ok then
       print(err)
@@ -192,6 +192,6 @@ for _, testname in ipairs(testnames) do
    end
 end
 
-print("Compiler: " .. tostring(count_ok) .. "/" .. tostring(#testnames) .. " OK")
+print(tostring(count_ok) .. "/" .. tostring(#testnames) .. " OK")
 
 os.exit(count_ok == #testnames and 0 or 1)
