@@ -23,14 +23,14 @@ local function _fake_command(ctx)
 end
 
 local function _loader(ctx)
-   -- We know the context is a table with a .lace table, so retrieve
+   -- We know the context is a table with a _lace table, so retrieve
    -- the loader function.  If it's absent, return a loader which
    -- fails due to no loader being present.
    return ctx._lace.loader or _fake_loader
 end
 
 local function _command(ctx, name)
-   -- While we know .lace is present, there's no guarantee they added
+   -- While we know _lace is present, there's no guarantee they added
    -- any commands
    local cmdtab = ctx._lace.commands or {}
    local cfn = cmdtab[name]
@@ -71,7 +71,7 @@ end
 
 local function internal_compile_ruleset(compcontext, sourcename, content, suppress_default)
    assert(type(compcontext) == "table", "Compilation context must be a table")
-   assert(type(compcontext._lace) == "table", "Compilation context must contain a .lace table")
+   assert(type(compcontext._lace) == "table", "Compilation context must contain a _lace table")
    assert(type(sourcename) == "string", "Source name must be a string")
    assert(content == nil or type(content) == "string", "Content must be nil or a string")
    if not content then
