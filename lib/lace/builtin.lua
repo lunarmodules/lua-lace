@@ -176,7 +176,7 @@ function builtin.define(compcontext, define, name, controltype, ...)
    
    local controlfn = _controlfn(compcontext, controltype)
    if not controlfn then
-      return compiler().error("Unknown control type", {3})
+      return compiler().error("Unknown control type: " .. controltype, {3})
    end
 
    local ctrltab, msg = controlfn(compcontext, controltype, ...)
