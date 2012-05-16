@@ -31,13 +31,13 @@ end
 function suite.context_missing_dot_lace()
    local result, msg = compiler.compile({}, "")
    assert(result == nil, "Lua errors should return nil")
-   assert(msg:match("context must contain"), "Supposed to whinge about context missing .lace")
+   assert(msg:match("context must contain"), "Supposed to whinge about context missing _lace")
 end
 
 function suite.context_dot_lace_not_table()
    local result, msg = compiler.compile({_lace = true}, "")
    assert(result == nil, "Lua errors should return nil")
-   assert(msg:match("context must contain"), "Supposed to whinge about context missing .lace")
+   assert(msg:match("context must contain"), "Supposed to whinge about context missing _lace")
 end
 
 function suite.source_not_string()
