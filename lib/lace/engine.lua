@@ -74,6 +74,12 @@ local function run_ruleset(ruleset, exec_context)
       return false, "Ruleset did not explicitly allow or deny"
    end
 
+   if type(msg) == "table" then
+      -- TODO: Extract position information etc from error and
+      -- formulate a gorgeous multiline error message.
+      msg = msg.msg or "Empty error"
+   end
+
    return ret, msg
 end
 
