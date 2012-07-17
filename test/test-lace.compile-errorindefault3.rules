@@ -1,0 +1,4 @@
+-- Expect error on line 3 word 4
+
+default allow "" extrashite
+

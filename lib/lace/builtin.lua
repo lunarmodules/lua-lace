@@ -81,7 +81,7 @@ local function _return(compcontext, result, reason, ...)
       return err.error("Unknown result: " .. result, {1})
    end
    if type(reason) ~= "string" then
-      return err.error("Expected reason, got nothing")
+      return err.error("Expected reason, got nothing", {1})
    end
 
    local cond = {...}
@@ -104,7 +104,7 @@ builtin.deny = _return
 function builtin.default(compcontext, def, result, reason, unwanted)
    assert(def == "default", "Somehow, builtin.default got something odd")
    if type(result) ~= "string" then
-      return err.error("Expected result, got nothing")
+      return err.error("Expected result, got nothing", {1})
    end
    if result ~= "allow" and result ~= "deny" then
       return err.error("Result wasn't allow or deny", {2})
@@ -117,7 +117,7 @@ function builtin.default(compcontext, def, result, reason, unwanted)
    end
 
    if compcontext._lace.default then
-      return err.error("Cannot change the default")
+      return err.error("Cannot change the default", {1, 2})
    end
    
    local uncond, last = unconditional_result, last_result
@@ -134,10 +134,10 @@ end
 
 local function _compile_any_all_of(compcontext, mtype, first, second, ...)
    if type(first) ~= "string" then
-      return err.error("Expected at least two names, got none")
+      return err.error("Expected at least two names, got none", {1})
    end
    if type(second) ~= "string" then
-      return err.error("Expected at least two names, only got one")
+      return err.error("Expected at least two names, only got one", {1, 2})
    end
 
    return {

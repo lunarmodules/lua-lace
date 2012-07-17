@@ -1,0 +1,5 @@
+-- Expect error on line 5 word 1,2
+
+default deny
+
+default allow
