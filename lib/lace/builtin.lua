@@ -183,11 +183,7 @@ function builtin.define(compcontext, define, name, controltype, ...)
    local ctrltab, msg = controlfn(compcontext, controltype, ...)
    if type(ctrltab) ~= "table" then
       -- offset all the words in the error by 2 (for define and name)
-      if msg.words then
-	 for i = 1, #msg.words do
-	    msg.words[i] = msg.words[i] + 2
-	 end
-      end
+      msg = err.offset(msg, 2)
       return false, msg
    end
 

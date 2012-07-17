@@ -7,9 +7,7 @@
 -- For licence terms, see COPYING
 --
 
-local function _error(str, words)
-   return { msg = str, words = words }
-end
+local err = require 'lace.error'
 
 local function _dlace(ctx)
    local ret = ctx._lace or {}
@@ -21,7 +19,7 @@ local function set_define(exec_context, name, defn)
    local dlace = _dlace(exec_context)
    dlace.defs = dlace.defs or {}
    if dlace.defs[name] then
-      return false, _error("Attempted to redefine " .. name, {2})
+      return err.error("Attempted to redefine " .. name, {2})
    end
    dlace.defs[name] = defn
    return true
@@ -32,7 +30,7 @@ local function test_define(exec_context, name)
    dlace.defs = dlace.defs or {}
    local defn = dlace.defs[name]
    if not defn then
-      return nil, _error("Unknown definition: " .. name)
+      return err.error("Unknown definition: " .. name, {2}, true)
    end
    -- Otherwise we evaluate the definition and return it
    return defn.fn(exec_context, unpack(defn.args))

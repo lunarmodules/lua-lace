@@ -124,7 +124,7 @@ local function internal_compile_ruleset(compcontext, sourcename, content, suppre
    --   There's no unconditional result and no default, fake up a default and
    --     then use it.
    if not suppress_default and not uncond and not result then
-      return false, { msg = "No result set whatsoever", words = {} }
+      return err.error("No result set whatsoever")
    end
 
    if not suppress_default and not uncond then
