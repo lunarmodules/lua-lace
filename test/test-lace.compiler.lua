@@ -195,7 +195,6 @@ function suite.error_does_not_exist()
    assert(result == false, "Errors compiling should return false")
    assert(type(msg) == "string", "Compilation errors should be strings")
    assert(msg:find("\n"), "Compilation errors are multiline")
-   -- This error should be in the implicit includes
    local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
    assert(line1:find("does%-not%-exist"), "The first line must mention the error")
    assert(line2 == "Implicit inclusion of does-not-exist :: 1", "The second line is where the error happened")
@@ -203,25 +202,11 @@ function suite.error_does_not_exist()
    assert(line4 == "        ^^^^^^^^^^^^^^", "The fourth line highlights relevant words")
 end
 
-function suite.error_in_define()
-   local result, msg = compiler.compile(comp_context, "errorindefine")
-   assert(result == false, "Errors compiling should return false")
-   assert(type(msg) == "string", "Compilation errors should be strings")
-   assert(msg:find("\n"), "Compilation errors are multiline")
-   -- This error should be on line 3 word 3 of 'errorindefine'
-   local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
-   assert(line1:find("does_not_exist"), "The first line must mention the error")
-   assert(line2 == "real-errorindefine :: 3", "The second line is where the error happened")
-   assert(line3 == "define fish does_not_exist", "The third line is the original line")
-   assert(line4 == "            ^^^^^^^^^^^^^^", "The fourth line highlights relevant words")
-end
-
 function suite.error_in_define_anyof1()
    local result, msg = compiler.compile(comp_context, "errorindefineanyof1")
    assert(result == false, "Errors compiling should return false")
    assert(type(msg) == "string", "Compilation errors should be strings")
    assert(msg:find("\n"), "Compilation errors are multiline")
-   -- This error should be on line 3 word 3 of 'errorindefine'
    local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
    assert(line1:find("at least"), "The first line must mention the error")
    assert(line2 == "real-errorindefineanyof1 :: 3", "The second line is where the error happened")
@@ -234,7 +219,6 @@ function suite.error_in_define_anyof2()
    assert(result == false, "Errors compiling should return false")
    assert(type(msg) == "string", "Compilation errors should be strings")
    assert(msg:find("\n"), "Compilation errors are multiline")
-   -- This error should be on line 3 word 3 of 'errorindefine'
    local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
    assert(line1:find("at least"), "The first line must mention the error")
    assert(line2 == "real-errorindefineanyof2 :: 3", "The second line is where the error happened")
@@ -247,7 +231,6 @@ function suite.error_in_allow_or_deny()
    assert(result == false, "Errors compiling should return false")
    assert(type(msg) == "string", "Compilation errors should be strings")
    assert(msg:find("\n"), "Compilation errors are multiline")
-   -- This error should be on line 3 word 3 of 'errorindefine'
    local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
    assert(line1:find("Expected reason"), "The first line must mention the error")
    assert(line2 == "real-errorinallow :: 3", "The second line is where the error happened")
@@ -255,12 +238,11 @@ function suite.error_in_allow_or_deny()
    assert(line4 == "^^^^^", "The fourth line highlights relevant words")
 end
 
-function suite.error_in_define_default1()
+function suite.error_in_default1()
    local result, msg = compiler.compile(comp_context, "errorindefault1")
    assert(result == false, "Errors compiling should return false")
    assert(type(msg) == "string", "Compilation errors should be strings")
    assert(msg:find("\n"), "Compilation errors are multiline")
-   -- This error should be on line 3 word 3 of 'errorindefine'
    local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
    assert(line1:find("Expected result"), "The first line must mention the error")
    assert(line2 == "real-errorindefault1 :: 3", "The second line is where the error happened")
@@ -268,12 +250,11 @@ function suite.error_in_define_default1()
    assert(line4 == "^^^^^^^", "The fourth line highlights relevant words")
 end
 
-function suite.error_in_define_default2()
+function suite.error_in_default2()
    local result, msg = compiler.compile(comp_context, "errorindefault2")
    assert(result == false, "Errors compiling should return false")
    assert(type(msg) == "string", "Compilation errors should be strings")
    assert(msg:find("\n"), "Compilation errors are multiline")
-   -- This error should be on line 3 word 3 of 'errorindefine'
    local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
    assert(line1:find("allow or deny"), "The first line must mention the error")
    assert(line2 == "real-errorindefault2 :: 3", "The second line is where the error happened")
@@ -281,12 +262,11 @@ function suite.error_in_define_default2()
    assert(line4 == "        ^^^^", "The fourth line highlights relevant words")
 end
 
-function suite.error_in_define_default3()
+function suite.error_in_default3()
    local result, msg = compiler.compile(comp_context, "errorindefault3")
    assert(result == false, "Errors compiling should return false")
    assert(type(msg) == "string", "Compilation errors should be strings")
    assert(msg:find("\n"), "Compilation errors are multiline")
-   -- This error should be on line 3 word 3 of 'errorindefine'
    local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
    assert(line1:find("additional"), "The first line must mention the error")
    assert(line2 == "real-errorindefault3 :: 3", "The second line is where the error happened")
@@ -294,17 +274,64 @@ function suite.error_in_define_default3()
    assert(line4 == "                 ^^^^^^^^^^", "The fourth line highlights relevant words")
 end
 
-function suite.error_in_define_default4()
+function suite.error_in_default4()
    local result, msg = compiler.compile(comp_context, "errorindefault4")
    assert(result == false, "Errors compiling should return false")
    assert(type(msg) == "string", "Compilation errors should be strings")
    assert(msg:find("\n"), "Compilation errors are multiline")
-   -- This error should be on line 3 word 3 of 'errorindefine'
    local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
    assert(line1:find("Cannot change"), "The first line must mention the error")
    assert(line2 == "real-errorindefault4 :: 5", "The second line is where the error happened")
    assert(line3 == 'default allow', "The third line is the original line")
    assert(line4 == "^^^^^^^ ^^^^^", "The fourth line highlights relevant words")
+end
+
+function suite.error_in_define1()
+   local result, msg = compiler.compile(comp_context, "errorindefine1")
+   assert(result == false, "Errors compiling should return false")
+   assert(type(msg) == "string", "Compilation errors should be strings")
+   assert(msg:find("\n"), "Compilation errors are multiline")
+   local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
+   assert(line1:find("Expected name"), "The first line must mention the error")
+   assert(line2 == "real-errorindefine1 :: 3", "The second line is where the error happened")
+   assert(line3 == 'define', "The third line is the original line")
+   assert(line4 == "^^^^^^", "The fourth line highlights relevant words")
+end
+
+function suite.error_in_define2()
+   local result, msg = compiler.compile(comp_context, "errorindefine2")
+   assert(result == false, "Errors compiling should return false")
+   assert(type(msg) == "string", "Compilation errors should be strings")
+   assert(msg:find("\n"), "Compilation errors are multiline")
+   local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
+   assert(line1:find("Bad name"), "The first line must mention the error")
+   assert(line2 == "real-errorindefine2 :: 3", "The second line is where the error happened")
+   assert(line3 == 'define !fish', "The third line is the original line")
+   assert(line4 == "       ^^^^^", "The fourth line highlights relevant words")
+end
+
+function suite.error_in_define3()
+   local result, msg = compiler.compile(comp_context, "errorindefine3")
+   assert(result == false, "Errors compiling should return false")
+   assert(type(msg) == "string", "Compilation errors should be strings")
+   assert(msg:find("\n"), "Compilation errors are multiline")
+   local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
+   assert(line1:find("Expected control"), "The first line must mention the error")
+   assert(line2 == "real-errorindefine3 :: 3", "The second line is where the error happened")
+   assert(line3 == 'define fish', "The third line is the original line")
+   assert(line4 == "^^^^^^ ^^^^", "The fourth line highlights relevant words")
+end
+
+function suite.error_in_define4()
+   local result, msg = compiler.compile(comp_context, "errorindefine4")
+   assert(result == false, "Errors compiling should return false")
+   assert(type(msg) == "string", "Compilation errors should be strings")
+   assert(msg:find("\n"), "Compilation errors are multiline")
+   local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
+   assert(line1:find("Unknown control"), "The first line must mention the error")
+   assert(line2 == "real-errorindefine4 :: 3", "The second line is where the error happened")
+   assert(line3 == "define fish does_not_exist", "The third line is the original line")
+   assert(line4 == "            ^^^^^^^^^^^^^^", "The fourth line highlights relevant words")
 end
 
 local count_ok = 0

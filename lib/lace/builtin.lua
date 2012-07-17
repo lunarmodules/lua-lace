@@ -164,7 +164,7 @@ end
 
 function builtin.define(compcontext, define, name, controltype, ...)
    if type(name) ~= "string" then
-      return err.error("Expected name, got nothing")
+      return err.error("Expected name, got nothing", {1})
    end
 
    if name == "" or name:sub(1,1) == "!" then
@@ -172,7 +172,7 @@ function builtin.define(compcontext, define, name, controltype, ...)
    end
 
    if type(controltype) ~= "string" then
-      return err.error("Expected control type, got nothing")
+      return err.error("Expected control type, got nothing", {1, 2})
    end
    
    local controlfn = _controlfn(compcontext, controltype)
