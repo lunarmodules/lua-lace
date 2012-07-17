@@ -68,11 +68,7 @@ local function run_ruleset(ruleset, exec_context)
       return nil, ret
    end
 
-   if ret == "" then
-      -- Empty string indicates no error but no result, we don't like
-      -- that here so we return an error
-      return false, "Ruleset did not explicitly allow or deny"
-   end
+   assert(ret ~= "", "It should not be possible for a ruleset to fail to return a result")
 
    if type(msg) == "table" then
       -- TODO: Extract position information etc from error and
