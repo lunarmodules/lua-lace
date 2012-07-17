@@ -1,0 +1,5 @@
+-- Error in define, expect an error on line 3 word 3
+
+define fish NOCOMPILE
+
+allow "anyway"

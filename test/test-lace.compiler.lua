@@ -139,6 +139,11 @@ local comp_context = {
       commands = {
 	 DISABLEDCOMMAND = false,
       },
+      controltype = {
+	 nocompile = function()
+			return err.error("NOCOMPILE", {2})
+		     end,
+      },
    },
 }
 
@@ -332,6 +337,43 @@ function suite.error_in_define4()
    assert(line2 == "real-errorindefine4 :: 3", "The second line is where the error happened")
    assert(line3 == "define fish does_not_exist", "The third line is the original line")
    assert(line4 == "            ^^^^^^^^^^^^^^", "The fourth line highlights relevant words")
+end
+
+function suite.error_in_define5()
+   local result, msg = compiler.compile(comp_context, "errorindefine5")
+   assert(result == false, "Errors compiling should return false")
+   assert(type(msg) == "string", "Compilation errors should be strings")
+   assert(msg:find("\n"), "Compilation errors are multiline")
+   local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
+   assert(line1:find("NOCOMPILE"), "The first line must mention the error")
+   assert(line2 == "real-errorindefine5 :: 3", "The second line is where the error happened")
+   assert(line3 == "define fish NOCOMPILE", "The third line is the original line")
+   assert(line4 == "            ^^^^^^^^^", "The fourth line highlights relevant words")
+end
+
+function suite.error_in_include1()
+   local result, msg = compiler.compile(comp_context, "errorininclude1")
+   assert(result == false, "Errors compiling should return false")
+   assert(type(msg) == "string", "Compilation errors should be strings")
+   assert(msg:find("\n"), "Compilation errors are multiline")
+   local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
+   assert(line1:find("No ruleset named"), "The first line must mention the error")
+   assert(line2 == "real-errorininclude1 :: 3", "The second line is where the error happened")
+   assert(line3 == "include", "The third line is the original line")
+   assert(line4 == "^^^^^^^", "The fourth line highlights relevant words")
+end
+
+function suite.error_in_include2()
+   local result, msg = compiler.compile(comp_context, "errorininclude2")
+   assert(result == false, "Errors compiling should return false")
+   assert(type(msg) == "string", "Compilation errors should be strings")
+   assert(msg:find("\n"), "Compilation errors are multiline")
+   print(msg)
+   local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
+   assert(line1:find("NOTFOUND"), "The first line must mention the error")
+   assert(line2 == "real-errorininclude2 :: 3", "The second line is where the error happened")
+   assert(line3 == "include errorininclude2-NOTFOUND", "The third line is the original line")
+   assert(line4 == "        ^^^^^^^^^^^^^^^^^^^^^^^^", "The fourth line highlights relevant words")
 end
 
 local count_ok = 0

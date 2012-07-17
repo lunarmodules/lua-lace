@@ -337,7 +337,7 @@ function suite.compile_include_statement_noname()
    assert(cmdtab == false, "Internal errors should return false")
    assert(type(msg) == "table", "Internal errors should return tables")
    assert(type(msg.msg) == "string", "Internal errors should have string messages")
-   assert(msg.msg:match("file name"), "Expected error should mention a lack of name")
+   assert(msg.msg:match("ruleset name"), "Expected error should mention a lack of name")
 end
 
 function suite.compile_include_statement_noloader()

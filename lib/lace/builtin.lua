@@ -221,7 +221,7 @@ function builtin.include(comp_context, cmd, file, ...)
    local conds = {...}
    
    if type(file) ~= "string" then
-      return err.error("No file named for inclusion")
+      return err.error("No ruleset named for inclusion", {1})
    end
 
    local loader = compiler().internal_loader(comp_context)
@@ -237,6 +237,7 @@ function builtin.include(comp_context, cmd, file, ...)
 	 }
       end
       -- Otherwise, propagate the error
+      err.offset(content, 1)
       return real, content
    end
    
