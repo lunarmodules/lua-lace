@@ -28,6 +28,7 @@ end
 local function _augment(err, source, linenr)
    err.source = source
    err.linenr = linenr
+   return err
 end
 
 local function _render(err)

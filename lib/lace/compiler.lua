@@ -75,7 +75,13 @@ local function internal_compile_ruleset(compcontext, sourcename, content, suppre
       -- No content supplied, try and load it.
       sourcename, content = _loader(compcontext)(compcontext, sourcename)
       if type(sourcename) ~= "string" then
-	 return false, content
+	 if not suppress_default then
+	    -- We're not suppressing default which implies we're
+	    -- the first out of the gate, so we need
+	    -- to offset to account for the implicit include
+	    err.offset(content, 1)
+	 end
+	 return false, err.augment(content, compcontext._lace.source, compcontext._lace.linenr)
       end
    end
 
@@ -105,7 +111,7 @@ local function internal_compile_ruleset(compcontext, sourcename, content, suppre
 	 _setposition(compcontext, ruleset, i)
 	 local rule, msg = compile_one_line(compcontext, line)
 	 if type(rule) ~= "table" then
-	    return rule, msg
+	    return rule, err.augment(msg, ruleset.content, i)
 	 end
 	 rule.linenr = i
 	 ruleset.rules[#ruleset.rules+1] = rule
@@ -124,7 +130,8 @@ local function internal_compile_ruleset(compcontext, sourcename, content, suppre
    --   There's no unconditional result and no default, fake up a default and
    --     then use it.
    if not suppress_default and not uncond and not result then
-      return err.error("No result set whatsoever")
+      local _, nores = err.error("No result set whatsoever", {})
+      return false, err.augment(nores, ruleset.content, #ruleset.content.lines + 1)
    end
 
    if not suppress_default and not uncond then
@@ -142,6 +149,25 @@ local function internal_compile_ruleset(compcontext, sourcename, content, suppre
 end
 
 local function compile_ruleset(ctx, src, cnt)
+   -- Augment the compiler context with a false
+   -- source so that we can be sure the expect early errors to stand a chance
+   if ctx and src and not cnt then
+      if type(ctx._lace) ~= "table" then
+	 return nil, "Compilation context must contain a _lace table"
+      end
+      ctx._lace.source = {
+	 source = "Implicit inclusion of " .. src,
+	 lines = { {
+	       original = "include " .. src,
+	       content = {
+		  { spos = 1, epos = 7, content = "include" },
+		  { spos = 9, epos = 8 + #src, content = src }
+	       }
+	    }
+	 }
+      }
+      ctx._lace.linenr = 1
+   end
    local ok, ret, msg = xpcall(function() 
 				  return internal_compile_ruleset(ctx, src, cnt) 
 			       end, debug.traceback)
@@ -153,7 +179,7 @@ local function compile_ruleset(ctx, src, cnt)
 
    if type(msg) == "table" then
       assert(type(msg.msg) == "string", "No error message")
-      msg = msg.msg
+      msg = err.render(msg)
    end
 
    return ret, msg

@@ -50,7 +50,8 @@ end
 function suite.error_augmentation()
    local f, err = error.error("msg")
    local src = {}
-   error.augment(err, src, 10)
+   local aug = error.augment(err, src, 10)
+   assert(aug == err, "Augmentation should return the error")
    assert(err.source == src, "Augmented errors should contain their source data")
    assert(err.linenr == 10, "Augmented errors should contain their error line")
 end

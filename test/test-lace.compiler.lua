@@ -188,6 +188,42 @@ function suite.load_file_with_one_command()
    assert(type(rule.args) == "table", "Rules should have arguments")
 end
 
+-- The various error paths must now be tested for location veracity
+
+function suite.error_does_not_exist()
+   local result, msg = compiler.compile(comp_context, "does-not-exist")
+   assert(result == false, "Errors compiling should return false")
+   assert(type(msg) == "string", "Compilation errors should be strings")
+   assert(msg:find("\n"), "Compilation errors are multiline")
+   -- This error should be in the implicit includes
+   local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
+   assert(line1, "There is a line 1")
+   assert(line2, "There is a line 2")
+   assert(line3, "There is a line 3")
+   assert(line4, "There is a line 4")
+   assert(line1:find("does%-not%-exist"), "The first line must mention the error")
+   assert(line2 == "Implicit inclusion of does-not-exist :: 1", "The second line is where the error happened")
+   assert(line3 == "include does-not-exist", "The third line is the original line")
+   assert(line4 == "        ^^^^^^^^^^^^^^", "The fourth line highlights relevant words")
+end
+
+function suite.error_in_define()
+   local result, msg = compiler.compile(comp_context, "errorindefine")
+   assert(result == false, "Errors compiling should return false")
+   assert(type(msg) == "string", "Compilation errors should be strings")
+   assert(msg:find("\n"), "Compilation errors are multiline")
+   -- This error should be on line 3 word 3 of 'errorindefine'
+   local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
+   assert(line1, "There is a line 1")
+   assert(line2, "There is a line 2")
+   assert(line3, "There is a line 3")
+   assert(line4, "There is a line 4")
+   assert(line1:find("does_not_exist"), "The first line must mention the error")
+   assert(line2 == "real-errorindefine :: 3", "The second line is where the error happened")
+   assert(line3 == "define fish does_not_exist", "The third line is the original line")
+   assert(line4 == "            ^^^^^^^^^^^^^^", "The fourth line highlights relevant words")
+end
+
 local count_ok = 0
 for _, testname in ipairs(testnames) do
 --   print("Run: " .. testname)
