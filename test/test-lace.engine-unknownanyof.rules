@@ -1,0 +1,5 @@
+-- Expect error at line 5 word 3
+
+define fish anyof pants cake
+
+allow anyway fish

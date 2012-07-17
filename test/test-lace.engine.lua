@@ -85,7 +85,7 @@ end
 
 function suite.check_error_propagates()
    local function _explode()
-      return { fn = function() return false, "EXPLODE" end, args = {} }
+      return { fn = function() return lace.error.error("EXPLODE", {1}) end, args = {} }
    end
    local compctx = {_lace={commands={explode=_explode}}}
    local ruleset, msg = lace.compiler.compile(compctx, "src", "explode\nallow because")
@@ -204,6 +204,45 @@ function suite.test_runtime_error()
    assert(result == false, "Did not error out")
    assert(type(msg) == "string", "Generated a non-string error")
    assert(msg:find("woah"), "Did not generate the right error: " .. msg)
+end
+
+function suite.doubledefine()
+   local ruleset, msg = lace.compiler.compile(comp_context, "doubledefine")
+   assert(type(ruleset) == "table", "Ruleset did not compile")
+   local ectx = {error = true}
+   local result, msg = lace.engine.run(ruleset, ectx)
+   assert(result == false, "Did not error out")
+   local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
+   assert(line1:find("redefine fish"), "The first line must mention the error")
+   assert(line2 == "real-doubledefine :: 5", "The second line is where the error happened")
+   assert(line3 == "define fish equal state two", "The third line is the original line")
+   assert(line4 == "       ^^^^                ", "The fourth line highlights relevant words")
+end
+
+function suite.unknowndefine()
+   local ruleset, msg = lace.compiler.compile(comp_context, "unknowndefine")
+   assert(type(ruleset) == "table", "Ruleset did not compile")
+   local ectx = {error = true}
+   local result, msg = lace.engine.run(ruleset, ectx)
+   assert(result == false, "Did not error out")
+   local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
+   assert(line1:find("definition: fish"), "The first line must mention the error")
+   assert(line2 == "real-unknowndefine :: 3", "The second line is where the error happened")
+   assert(line3 == "allow anyway fish", "The third line is the original line")
+   assert(line4 == "             ^^^^", "The fourth line highlights relevant words")
+end
+
+function suite.unknownanyof()
+   local ruleset, msg = lace.compiler.compile(comp_context, "unknownanyof")
+   assert(type(ruleset) == "table", "Ruleset did not compile")
+   local ectx = {error = true}
+   local result, msg = lace.engine.run(ruleset, ectx)
+   assert(result == false, "Did not error out")
+   local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
+   assert(line1:find("definition: pants"), "The first line must mention the error")
+   assert(line2 == "real-unknownanyof :: 5", "The second line is where the error happened")
+   assert(line3 == "allow anyway fish", "The third line is the original line")
+   assert(line4 == "             ^^^^", "The fourth line highlights relevant words")
 end
 
 local count_ok = 0

@@ -30,7 +30,7 @@ local function test_define(exec_context, name)
    dlace.defs = dlace.defs or {}
    local defn = dlace.defs[name]
    if not defn then
-      return err.error("Unknown definition: " .. name, {2}, true)
+      return err.error("Unknown definition: " .. name, {1}, true)
    end
    -- Otherwise we evaluate the definition and return it
    return defn.fn(exec_context, unpack(defn.args))
@@ -46,7 +46,7 @@ local function internal_run_ruleset(ruleset, exec_context)
       dlace.linenr = rule.linenr
       local result, msg = rule.fn(exec_context, unpack(rule.args))
       if not result then
-	 return false, msg
+	 return false, err.augment(msg, rule.source, rule.linenr)
       elseif result ~= true then
 	 -- Explicit result, return it
 	 return result, msg
@@ -63,15 +63,14 @@ local function run_ruleset(ruleset, exec_context)
 				  return internal_run_ruleset(ruleset, exec_context)
 			       end, debug.traceback)
    if not ok then
-      return nil, ret
+      local _, msg = err.error(ret, {1})
+      return nil, err.render(err.augment(msg, ruleset.rules[1].source, ruleset.rules[1].linenr))
    end
 
    assert(ret ~= "", "It should not be possible for a ruleset to fail to return a result")
 
    if type(msg) == "table" then
-      -- TODO: Extract position information etc from error and
-      -- formulate a gorgeous multiline error message.
-      msg = msg.msg or "Empty error"
+      msg = err.render(msg)
    end
 
    return ret, msg

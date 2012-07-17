@@ -1,0 +1,7 @@
+-- Expect an error on line 5 word 2
+
+define fish equal state one
+
+define fish equal state two
+
+allow "anyway"

@@ -1,0 +1,3 @@
+-- Expect error on line 3, word 2
+
+allow anyway fish

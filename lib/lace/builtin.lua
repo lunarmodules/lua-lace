@@ -27,6 +27,7 @@ local function run_conditions(exec_context, cond, anyof)
       end
       local res, msg = engine.test(exec_context, name)
       if res == nil then
+	 msg.words = {i}
 	 return nil, msg
       end
       if invert then
@@ -68,6 +69,7 @@ local function _do_return(exec_context, result, reason, cond)
    local pass, msg = run_conditions(exec_context, cond)
    if pass == nil then
       -- Pass errors
+      err.offset(msg, 2)
       return nil, msg
    elseif pass == false then
       -- Conditions failed, return true to continue execution

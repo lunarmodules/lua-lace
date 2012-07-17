@@ -114,6 +114,7 @@ local function internal_compile_ruleset(compcontext, sourcename, content, suppre
 	    return rule, err.augment(msg, ruleset.content, i)
 	 end
 	 rule.linenr = i
+	 rule.source = ruleset.content
 	 ruleset.rules[#ruleset.rules+1] = rule
       end
    end
