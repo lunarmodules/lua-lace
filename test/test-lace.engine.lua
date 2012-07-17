@@ -126,6 +126,17 @@ local comp_context = {
 		       args = { key, value },
 		    }
 		 end,
+	 error = function(ctx, err)
+		    return {
+		       fn = function(ectx)
+			       if ectx.error then
+				  return nil, { msg = "woah", words = {1} }
+			       end
+			       return false
+			    end,
+		       args = {},
+		    }
+		 end,
       },
    },
 }
@@ -176,6 +187,16 @@ function suite.test_complex_ruleset()
       assert(result == expect, "Expected " .. expect)
       assert(msg == s, "Reason expected " .. s)
    end
+end
+
+function suite.test_runtime_error()
+   local ruleset, msg = lace.compiler.compile(comp_context, "runtimeerror")
+   assert(type(ruleset) == "table", "Ruleset did not compile")
+   local ectx = {error=true}
+   local result, msg = lace.engine.run(ruleset, ectx)
+   assert(result == false, "Did not error out")
+   assert(type(msg) == "string", "Generated a non-string error")
+   assert(msg:find("woah"), "Did not generate the right error: " .. msg)
 end
 
 local count_ok = 0

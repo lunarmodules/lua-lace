@@ -1,0 +1,5 @@
+-- The following causes an error at runtime
+
+define will_error error
+
+allow "yay" will_error
