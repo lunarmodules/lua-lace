@@ -43,8 +43,8 @@ local function _command(ctx, name)
 end
 
 local function _normalise_error(ctx, err)
-   -- For now, just return the string
-   return err.msg
+   -- For now, just return the error
+   return err
 end
 
 local function _setposition(context, ruleset, linenr)

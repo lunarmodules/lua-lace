@@ -246,7 +246,7 @@ function builtin.include(comp_context, cmd, file, ...)
    -- Okay, the file is present, let's parse it.
    local ruleset, msg = compiler().internal_compile(comp_context, real, content, true)
    if type(ruleset) ~= "table" then
-      return compiler().error(msg)
+      return false, type(msg) == "table" and msg or compiler().error(msg)
    end
    
    -- Okay, we parsed, so build the runtime
