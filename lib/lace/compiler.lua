@@ -9,17 +9,14 @@
 
 local lex = require "lace.lex"
 local builtin = require "lace.builtin"
-
-local function _error(str, words)
-   return false, { msg = str, words = words }
-end
+local err = require "lace.error"
 
 local function _fake_loader(ctx, name)
-   return _error("Ruleset not found: " .. name, {1})
+   return err.error("Ruleset not found: " .. name, {1})
 end
 
 local function _fake_command(ctx)
-   return _error("Command is disabled by context")
+   return err.error("Command is disabled by context")
 end
 
 local function _loader(ctx)
@@ -42,7 +39,7 @@ local function _command(ctx, name)
    return cfn
 end
 
-local function _normalise_error(ctx, err)
+local function _normalise_error(ctx, err, offset)
    -- For now, just return the error
    return err
 end
@@ -58,7 +55,7 @@ local function compile_one_line(compcontext, line)
    local cmdname = line.content[1].str
    local cmdfn = _command(compcontext, cmdname)
    if type(cmdfn) ~= "function" then
-      return _error("Unknown command: " .. cmdname, {1})
+      return err.error("Unknown command: " .. cmdname, {1})
    end
 
    local args = {}
@@ -78,7 +75,7 @@ local function internal_compile_ruleset(compcontext, sourcename, content, suppre
       -- No content supplied, try and load it.
       sourcename, content = _loader(compcontext)(compcontext, sourcename)
       if type(sourcename) ~= "string" then
-	 return false, _normalise_error(compcontext, content)
+	 return false, content
       end
    end
 
@@ -108,7 +105,7 @@ local function internal_compile_ruleset(compcontext, sourcename, content, suppre
 	 _setposition(compcontext, ruleset, i)
 	 local rule, msg = compile_one_line(compcontext, line)
 	 if type(rule) ~= "table" then
-	    return rule, (rule == nil) and msg or _normalise_error(compcontext, msg)
+	    return rule, msg
 	 end
 	 rule.linenr = i
 	 ruleset.rules[#ruleset.rules+1] = rule
@@ -127,7 +124,7 @@ local function internal_compile_ruleset(compcontext, sourcename, content, suppre
    --   There's no unconditional result and no default, fake up a default and
    --     then use it.
    if not suppress_default and not uncond and not result then
-      return false, "No result set whatsoever"
+      return false, { msg = "No result set whatsoever", words = {} }
    end
 
    if not suppress_default and not uncond then
@@ -152,10 +149,11 @@ local function compile_ruleset(ctx, src, cnt)
       return nil, ret
    end
 
+   assert((ret) or (type(msg) == "table"), "Prenormalised error! " .. tostring(msg))
+
    if type(msg) == "table" then
-      -- TODO: Extract position information etc from error and
-      -- formulate a gorgeous multiline error message.
-      msg = msg.msg or "Empty error"
+      assert(type(msg.msg) == "string", "No error message")
+      msg = msg.msg
    end
 
    return ret, msg
@@ -165,5 +163,4 @@ return {
    internal_loader = _loader,
    internal_compile = internal_compile_ruleset,
    compile = compile_ruleset,
-   error = _error,
 }

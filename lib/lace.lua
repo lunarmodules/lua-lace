@@ -11,6 +11,7 @@ local lex = require "lace.lex"
 local compiler = require "lace.compiler"
 local builtin = require "lace.builtin"
 local engine = require "lace.engine"
+local error = require 'lace.error'
 
 local _VERSION = 0
 
@@ -21,6 +22,7 @@ return {
    compiler = compiler,
    builtin = builtin,
    engine = engine,
+   error = error,
    _VERSION = _VERSION,
    VERSION = VERSION,
 }

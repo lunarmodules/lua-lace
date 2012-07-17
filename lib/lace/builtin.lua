@@ -10,6 +10,7 @@
 local builtin = {}
 
 local engine = require "lace.engine"
+local err = require "lace.error"
 
 local function compiler()
    return require "lace.compiler"
@@ -77,10 +78,10 @@ end
 
 local function _return(compcontext, result, reason, ...)
    if result ~= "allow" and result ~= "deny" then
-      return compiler().error("Unknown result: " .. result, {1})
+      return err.error("Unknown result: " .. result, {1})
    end
    if type(reason) ~= "string" then
-      return compiler().error("Expected reason, got nothing")
+      return err.error("Expected reason, got nothing")
    end
 
    local cond = {...}
@@ -103,20 +104,20 @@ builtin.deny = _return
 function builtin.default(compcontext, def, result, reason, unwanted)
    assert(def == "default", "Somehow, builtin.default got something odd")
    if type(result) ~= "string" then
-      return compiler().error("Expected result, got nothing")
+      return err.error("Expected result, got nothing")
    end
    if result ~= "allow" and result ~= "deny" then
-      return compiler().error("Result wasn't allow or deny", {2})
+      return err.error("Result wasn't allow or deny", {2})
    end
    if type(reason) ~= "string" then
       reason = "Default behaviour"
    end
    if unwanted ~= nil then
-      return compiler().error("Unexpected additional content", {4})
+      return err.error("Unexpected additional content", {4})
    end
 
    if compcontext._lace.default then
-      return compiler().error("Cannot change the default")
+      return err.error("Cannot change the default")
    end
    
    local uncond, last = unconditional_result, last_result
@@ -133,10 +134,10 @@ end
 
 local function _compile_any_all_of(compcontext, mtype, first, second, ...)
    if type(first) ~= "string" then
-      return compiler().error("Expected at least two names, got none")
+      return err.error("Expected at least two names, got none")
    end
    if type(second) ~= "string" then
-      return compiler().error("Expected at least two names, only got one")
+      return err.error("Expected at least two names, only got one")
    end
 
    return {
@@ -163,20 +164,20 @@ end
 
 function builtin.define(compcontext, define, name, controltype, ...)
    if type(name) ~= "string" then
-      return compiler().error("Expected name, got nothing")
+      return err.error("Expected name, got nothing")
    end
 
    if name == "" or name:sub(1,1) == "!" then
-      return compiler().error("Bad name for definition", {2})
+      return err.error("Bad name for definition", {2})
    end
 
    if type(controltype) ~= "string" then
-      return compiler().error("Expected control type, got nothing")
+      return err.error("Expected control type, got nothing")
    end
    
    local controlfn = _controlfn(compcontext, controltype)
    if not controlfn then
-      return compiler().error("Unknown control type: " .. controltype, {3})
+      return err.error("Unknown control type: " .. controltype, {3})
    end
 
    local ctrltab, msg = controlfn(compcontext, controltype, ...)
@@ -224,7 +225,7 @@ function builtin.include(comp_context, cmd, file, ...)
    local conds = {...}
    
    if type(file) ~= "string" then
-      return compiler().error("No file named for inclusion")
+      return err.error("No file named for inclusion")
    end
 
    local loader = compiler().internal_loader(comp_context)
@@ -246,7 +247,7 @@ function builtin.include(comp_context, cmd, file, ...)
    -- Okay, the file is present, let's parse it.
    local ruleset, msg = compiler().internal_compile(comp_context, real, content, true)
    if type(ruleset) ~= "table" then
-      return false, type(msg) == "table" and msg or compiler().error(msg)
+      return false, msg
    end
    
    -- Okay, we parsed, so build the runtime

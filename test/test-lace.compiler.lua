@@ -12,8 +12,16 @@
 local luacov = require 'luacov'
 
 local compiler = require 'lace.compiler'
+local err = require 'lace.error'
 
 local testnames = {}
+
+local real_assert = assert
+local total_asserts = 0
+local function assert(...)
+   real_assert(...)
+   total_asserts = total_asserts + 1
+end
 
 local function add_test(suite, name, value)
    rawset(suite, name, value)
@@ -122,7 +130,7 @@ local comp_context = {
 		  end
 		  local fh = io.open("test/test-lace.compile-" .. name .. ".rules", "r")
 		  if not fh then
-		     return compiler.error("LOADER: Unknown: " .. name, {1})
+		     return err.error("LOADER: Unknown: " .. name, {1})
 		  end
 		  local content = fh:read("*a")
 		  fh:close()
@@ -192,6 +200,6 @@ for _, testname in ipairs(testnames) do
    end
 end
 
-print(tostring(count_ok) .. "/" .. tostring(#testnames) .. " OK")
+print(tostring(count_ok) .. "/" .. tostring(#testnames) .. " [" .. tostring(total_asserts) .. "] OK")
 
 os.exit(count_ok == #testnames and 0 or 1)

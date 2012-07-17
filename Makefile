@@ -1,6 +1,6 @@
 all: test
 
-MODULES := lace lace.lex lace.compiler lace.builtin lace.engine
+MODULES := lace lace.lex lace.compiler lace.builtin lace.engine lace.error
 LUA_VER := 5.1
 
 INST_BASE := /usr/local
