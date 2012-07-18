@@ -14,6 +14,7 @@ local engine = require "lace.engine"
 local error = require 'lace.error'
 
 local _VERSION = 0
+local _ABI = 1
 
 local VERSION = "Lace Version " .. tostring(_VERSION)
 
@@ -25,4 +26,6 @@ return {
    error = error,
    _VERSION = _VERSION,
    VERSION = VERSION,
+   _ABI = _ABI,
+   ABI = ABI,
 }
