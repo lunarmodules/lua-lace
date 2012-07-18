@@ -1,0 +1,31 @@
+Lace - Syntax of definition statements
+======================================
+
+Definition statements start with one of `def` or `define`.  They may
+also start `acl` to look more squiddish.
+
+The rough syntax of a definition statement is:
+
+    define <name> <controltype> <0-or-more-args>
+
+for example:
+
+    define is-admin is-in-group administrators
+
+There are some loose constraints on the name and controltype
+arguments.  The name SHOULD NOT contain quote characters and MUST NOT
+start with an exclamation point.  The controltype simply SHOULD NOT
+contain quotes.
+
+The control types are typically provided by the program which is using
+Lace.  However Lace does provide some simple control types which can
+be useful and callers are welcome to add them to their engines.
+
+The two simple control types Lace provides are the `allof` and `anyof`
+controls.  They, as their arguments, take two or more rule names and match if
+all or any (respectively) of their arguments resolve to true.  As with other
+parts of Lace, if the rule names are prefixed by exclamation points then their
+result is inverted before being tested.
+
+These give you ways to produce common subexpressions of the 'AND' and
+'OR' forms to be used in later rules.

@@ -1,0 +1,33 @@
+Lace - The syntax of the default statement
+==========================================
+
+The `default` statement is unusual in that it has no behaviour at runtime.  At
+compile time the `default` statement alters the behaviour of the compiler with
+respect to what happens at the end of the ruleset parse.
+
+If, when Lace has finished parsing the ruleset, the last allow or deny was not
+unconditional, then the compiler will, in the absence of a `default` statement,
+inject a terminal `allow`/`deny` of the opposite sense of the last explicit
+operation, unconditionally and with a reason of the empty string.
+
+If a `default` statement was encountered during processing then its chosen
+behaviour will be used instead.
+
+The syntax of the `default` statement is:
+
+    default 'allow' <reason>?
+
+or
+
+    default 'deny' <reason>?
+
+If reasons are not provided, the string "Default behaviour" is
+substituted.
+
+Once a single `default` statement has been encountered during
+compilation; it is an error, and the compiler WILL cease, if it
+encounters an additional `default` statement.
+
+Since it's common for rulesets to stem from a single core point, therefore it
+is recommended that the application define a `default` policy at the start of
+these core statements.
