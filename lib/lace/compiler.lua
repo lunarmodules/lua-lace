@@ -39,11 +39,6 @@ local function _command(ctx, name)
    return cfn
 end
 
-local function _normalise_error(ctx, err, offset)
-   -- For now, just return the error
-   return err
-end
-
 local function _setposition(context, ruleset, linenr)
    context._lace.source = (ruleset or {}).content
    context._lace.linenr = linenr
