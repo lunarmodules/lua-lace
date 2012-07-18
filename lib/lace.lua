@@ -13,7 +13,7 @@ local builtin = require "lace.builtin"
 local engine = require "lace.engine"
 local error = require 'lace.error'
 
-local _VERSION = 0
+local _VERSION = 1
 local _ABI = 1
 
 local VERSION = "Lace Version " .. tostring(_VERSION)
