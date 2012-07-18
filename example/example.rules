@@ -1,0 +1,18 @@
+-- This is the example ruleset for the Lace example
+--
+-- Any line which starts with --, # or // is a comment.
+# So this is also a comment
+// As is this
+
+-- This line uses the equality control type defined
+-- in the example to construct a predicate which
+-- can be used to allow access.
+define success equals want_to_pass yes
+
+-- This line allows access if the predicate passes
+allow "Ok" success
+
+-- Since the previous result was 'allow' the automatic defaulting
+-- process will insert a deny at the end of the ruleset.  No ruleset
+-- will ever return anything but allow, deny or an error.  The engine
+-- sees to this.

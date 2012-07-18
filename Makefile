@@ -22,6 +22,10 @@ clean:
 distclean: clean
 	find . -name "*~" -delete
 
+.PHONY: example
+example:
+	$(LUA) example/lace-example.lua
+
 .PHONY: test
 test:
 	@$(RM) luacov.stats.out
