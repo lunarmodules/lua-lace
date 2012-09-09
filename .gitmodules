@@ -1,0 +1,3 @@
+[submodule "extras/luacov"]
+	path = extras/luacov
+	url = git://git.gitano.org.uk/luacov.git
