@@ -3,7 +3,9 @@ all: test
 MODULES := lace lace.lex lace.compiler lace.builtin lace.engine lace.error
 LUA_VER := 5.1
 
-INST_BASE := /usr/local
+PREFIX ?= /usr/local
+
+INST_BASE := $(PREFIX)
 INST_ROOT := $(DESTDIR)$(INST_BASE)/share/lua/$(LUA_VER)
 
 MOD_FILES := $(patsubst %,%.lua,$(subst .,/,$(MODULES)))
