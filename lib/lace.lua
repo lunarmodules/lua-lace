@@ -7,6 +7,10 @@
 -- For licence terms, see COPYING
 --
 
+--- Lua Access Control Engine.
+--
+-- 
+
 local lex = require "lace.lex"
 local compiler = require "lace.compiler"
 local builtin = require "lace.builtin"

@@ -7,6 +7,14 @@
 -- For Licence terms, see COPYING
 --
 
+--- Lace Internals - Ruleset lexer.
+--
+-- The lexer for Lace is only used internally and is generally not accessed
+-- from outside of Lace.  It is exposed only for testing and validation
+-- purposes.
+
+local M = {}
+
 local function lex_one_line(line)
    local r = {}
    local acc = ""
@@ -83,7 +91,12 @@ local function lex_one_line(line)
    return r, warnings
 end
 
-local function lex_a_ruleset(ruleset, sourcename)
+--- Lexically analyse a ruleset.
+-- @tparam string ruleset The ruleset to lex.
+-- @tparam string sourcename The name of the source to go into debug info.
+-- @treturn table A list of lexed lines, each line being a table of tokens
+--                with their associated debug information.
+function M.string(ruleset, sourcename)
    local lines = {}
    local ret = { source = sourcename, lines = lines }
    local n = 1
@@ -112,6 +125,4 @@ local function lex_a_ruleset(ruleset, sourcename)
    return ret
 end
 
-return {
-   string = lex_a_ruleset,
-}
+return M

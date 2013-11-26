@@ -7,6 +7,12 @@
 -- For licence terms, see COPYING
 --
 
+--- The compiler for the Lua Access Control engine.
+--
+-- Lace works hard to give you good error message information when encountering
+-- problems with your rulesets.  The compiler gathers a lot of debug
+-- information and stores it alongside the compiled ruleset.
+
 local lex = require "lace.lex"
 local builtin = require "lace.builtin"
 local err = require "lace.error"
@@ -19,6 +25,15 @@ local function _fake_command(ctx)
    return err.error("Command is disabled by context")
 end
 
+--- Internal loader abstraction.
+--
+-- Used by `lace.builtin.commands.include`, this function returns a loader
+-- which can be used to acquire more content during compilation of a Lace
+-- ruleset.
+--
+-- @tparam table ctx The Lace compiliation context
+-- @treturn function A loader function
+-- @function internal_loader
 local function _loader(ctx)
    -- We know the context is a table with a _lace table, so retrieve
    -- the loader function.  If it's absent, return a loader which
@@ -61,6 +76,18 @@ local function compile_one_line(compcontext, line)
    return cmdfn(compcontext, unpack(args))
 end
 
+--- Internal ruleset compilation.
+--
+-- Internal ruleset compilation function.  This function should not be used
+-- except from compilation commands such as `lace.builtin.commands.include`.
+-- This function is much less forgiving of issues than `lace.compiler.compile`.
+--
+-- @tparam table compcontext Compilation context
+-- @tparam string sourcename Source name
+-- @tparam string content Source content
+-- @tparam boolean suppress_default Suppress the use of a default rule.
+-- @treturn table Compiled Lace ruleset
+-- @function internal_compile
 local function internal_compile_ruleset(compcontext, sourcename, content, suppress_default)
    assert(type(compcontext) == "table", "Compilation context must be a table")
    assert(type(compcontext._lace) == "table", "Compilation context must contain a _lace table")
@@ -144,6 +171,19 @@ local function internal_compile_ruleset(compcontext, sourcename, content, suppre
    return ruleset
 end
 
+--- Compile a lace ruleset.
+--
+-- Compile a lace ruleset so that it can be executed by `lace.engine.run`
+-- later.  If you provide content then it is compiled using the source name as
+-- the name used in error messages.  If you do not supply any content then Lace
+-- will construct an implicit include of the given source name.
+--
+-- @tparam table ctx Compilation context
+-- @tparam string src Source name
+-- @tparam ?string cnt Source contents (nil to cause an implicit
+--                                      include of _src_)
+-- @treturn table Compiled Lace ruleset
+-- @function compile
 local function compile_ruleset(ctx, src, cnt)
    -- Augment the compiler context with a false
    -- source so that we can be sure the expect early errors to stand a chance

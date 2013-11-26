@@ -7,6 +7,14 @@
 -- For Licence terms, see COPYING
 --
 
+--- Lace builtin commands and match types.
+--
+-- The builtin match types and commands provided by Lace.  These commands and
+-- match types are supported automatically by all lace compiles.  The builtin
+-- command `default` and the builtin commands `allow` and `deny` collude with
+-- the compiler to ensure that all compiled rulesets will always either
+-- explicitly allow or deny access.
+
 local builtin = {}
 
 local engine = require "lace.engine"
@@ -53,12 +61,36 @@ end
 
 local unconditional_result, last_result
 
+--- Internal function to get/set the last result for unconditional access.
+--
+-- The last result (unconditional only) is stored so that defaults can be
+-- processed in the absence of a `default` statement.
+--
+-- This function exists to collude with `lace.compiler.internal_compile` so
+-- that it can synthesise default access statements if needed.
+--
+-- @tparam string|nil newv The new value for the last access result.
+--                         It should be one of `allow`, `deny` or a _nil_.
+-- @treturn string|nil The old (current) value for the last access result.
+-- @function get_set_last_unconditional_result
 local function get_set_last_unconditional_result(newv)
    local ret = unconditional_result
    unconditional_result = newv
    return ret
 end
 
+--- Internal function to get/set the last result for access.
+--
+-- The last result (conditional perhaps) is stored so that defaults can be
+-- processed in the absence of a `default` statement.
+--
+-- This function exists to collude with `lace.compiler.internal_compile` so
+-- that it can synthesise default access statements if needed.
+--
+-- @tparam string|nil newv The new value for the last access result.
+--                         It should be one of `allow`, `deny` or a _nil_.
+-- @treturn string|nil The old (current) value for the last access result.
+-- @function get_set_last_result
 local function get_set_last_result(newv)
    local ret = last_result
    last_result = newv
@@ -78,6 +110,21 @@ local function _do_return(exec_context, result, reason, cond)
    return result, reason
 end
 
+--- Compile an `allow` or `deny`.
+--
+-- (_Note: this is also `commands.deny`_)
+--
+-- Allowing and denying access is, after all, what access control lists are all
+-- about.  This function compiles in an `allow` or `deny` statement including
+-- noting what kind of access statement it is and what 
+--
+-- @tparam table compcontext The compilation context
+-- @tparam string result The result to be compiled (`allow` or `deny`).
+-- @tparam string reason The reason to be returned to the user for this.
+-- @tparam[opt] string ... The conditions placed on this `allow` or `deny`.
+-- @treturn table The compiled `allow`/`deny`.
+-- @function commands.allow
+-- @alias commands.deny
 local function _return(compcontext, result, reason, ...)
    if result ~= "allow" and result ~= "deny" then
       return err.error("Unknown result: " .. result, {1})
@@ -103,6 +150,24 @@ builtin.deny = _return
 
 --[ Default for Allow and Deny ]------------------------------------
 
+--- Compile a `default` command.
+--
+-- All rulesets must, ultimately, allow or deny access.  The `default` command
+-- allows rulesets to define whether they are permissive (defaulting to
+-- `allow`) or proscriptive (defaulting to `deny`).
+--
+-- In addition, setting default causes a record to be made, preventing
+-- additional attempts to set a default access mode.  This ensures that once
+-- the default has been selected, additional ruleset included (perhaps from
+-- untrusted sources) cannot change the default behaviour.
+--
+-- @tparam table compcontext The compilation context
+-- @tparam string def The command which triggered this compilation. (`default`)
+-- @tparam string result The default result (`allow` or `deny`)
+-- @tparam string reason The reason to be given.
+-- @tparam[opt] * unwanted If _unwanted_ is anything but nil, an error occurs.
+-- @treturn table A null command
+-- @function commands.default
 function builtin.default(compcontext, def, result, reason, unwanted)
    assert(def == "default", "Somehow, builtin.default got something odd")
    if type(result) ~= "string" then
@@ -164,6 +229,24 @@ local function _controlfn(ctx, name)
    return cfn
 end
 
+--- Compile a definition command
+--
+-- Definitions are a core behaviour of Lace.  This builtin allows the ruleset
+-- to define additional conditions on which `allow`, `deny` and `include` can
+-- operate.  
+--
+-- @tparam table compcontext The compilation context.
+-- @tparam string define The word which triggered this compilation command.
+--                       (`define`)
+-- @tparam string name The name being defined.
+-- @tparam string controltype The control type to be used. (Such as `anyof`,
+--                            `allof` or any of the match types defined by
+--                            the caller of the compiler).
+-- @tparam[opt] string ... The content of the definition (consumed by the
+--                         match type compiler).
+-- @treturn table The compiled definition command.
+-- @function commands.define
+-- @alias commands.def
 function builtin.define(compcontext, define, name, controltype, ...)
    if type(name) ~= "string" then
       return err.error("Expected name, got nothing", {1})
@@ -217,6 +300,27 @@ local function _do_include(exec_context, ruleset, conds)
    return result, msg
 end
 
+--- Compile an `include` command.
+--
+-- Compile a lace `include` command.  This uses the exported internal loader
+-- function `lace.compiler.internal_loader` to find a loader and if it finds
+-- one, it uses the internal compilation function
+-- `lace.compiler.internal_compile` to compile the loaded source before
+-- constructing a runtime "inclusion" which deals with the conditions before
+-- running the sub-ruleset if appropriate.
+--
+-- Regardless of the conditions placed on the include statement, includes are
+-- always processed during compilation.
+--
+-- @tparam table comp_context The compilation context
+-- @tparam string cmd The command which triggered this include command.
+--                    (`include` or `include?`)
+-- @tparam string file The file (source name) to include.
+-- @tparam[opt] string ... Zero or more conditions under which the included
+--                         content will be run by the engine.  If there are no
+--                         conditions then the include is unconditional.
+-- @treturn table The compiled inclusion command.
+-- @function commands.include
 function builtin.include(comp_context, cmd, file, ...)
    local safe_if_not_present = cmd:sub(-1) == "?"
 
