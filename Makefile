@@ -1,4 +1,4 @@
-all: test
+all: test doc
 
 MODULES := lace lace.lex lace.compiler lace.builtin lace.engine lace.error
 LUA_VER := 5.1
@@ -20,6 +20,7 @@ LUA := LUA_PATH="$(shell pwd)/lib/?.lua;$(shell pwd)/extras/luacov/src/?.lua;;" 
 
 clean:
 	$(RM) luacov.report.out luacov.stats.out
+	$(RM) -r html
 
 distclean: clean
 	find . -name "*~" -delete
@@ -43,3 +44,7 @@ test:
 .PHONY: interactive
 interactive:
 	$(LUA) -e'lace=require"lace"' -i
+
+doc:
+	@echo "Running LDoc"
+	@ldoc .
