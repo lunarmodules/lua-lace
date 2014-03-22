@@ -15,7 +15,7 @@
 
 local M = {}
 
-local function lex_one_line(line)
+local function _lex_one_line(line)
    local r = {}
    local acc = ""
    local c
@@ -89,6 +89,15 @@ local function lex_one_line(line)
    end
 
    return r, warnings
+end
+
+local lexer_line_cache = {}
+
+local function lex_one_line(line)
+   if not lexer_line_cache[line] then
+      lexer_line_cache[line] = { _lex_one_line(line) }
+   end
+   return lexer_line_cache[line][1], lexer_line_cache[line][2]
 end
 
 --- Lexically analyse a ruleset.
