@@ -100,12 +100,18 @@ local function lex_one_line(line)
    return lexer_line_cache[line][1], lexer_line_cache[line][2]
 end
 
+local cached_full_lexes = {}
+
 --- Lexically analyse a ruleset.
 -- @tparam string ruleset The ruleset to lex.
 -- @tparam string sourcename The name of the source to go into debug info.
 -- @treturn table A list of lexed lines, each line being a table of tokens
 --                with their associated debug information.
 function M.string(ruleset, sourcename)
+   if cached_full_lexes[sourcename] and
+      cached_full_lexes[sourcename][ruleset] then
+      return cached_full_lexes[sourcename][ruleset]
+   end
    local lines = {}
    local ret = { source = sourcename, lines = lines }
    local n = 1
@@ -131,6 +137,8 @@ function M.string(ruleset, sourcename)
       lines[n] = linetab
       n = n + 1
    end
+   cached_full_lexes[sourcename] = cached_full_lexes[sourcename] or {}
+   cached_full_lexes[sourcename][ruleset] = ret
    return ret
 end
 
