@@ -9,7 +9,7 @@
 
 -- Step one, start coverage
 
-local luacov = require 'luacov'
+pcall(require, 'luacov')
 
 local builtin = require 'lace.builtin'
 local engine = require 'lace.engine'

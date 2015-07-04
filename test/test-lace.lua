@@ -9,7 +9,7 @@
 
 -- Step one, start coverage
 
-local luacov = require 'luacov'
+pcall(require, 'luacov')
 
 local lace = require 'lace'
 local lex = require 'lace.lex'

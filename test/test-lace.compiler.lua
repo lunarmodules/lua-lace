@@ -9,7 +9,7 @@
 
 -- Step one, start coverage
 
-local luacov = require 'luacov'
+pcall(require, 'luacov')
 
 local compiler = require 'lace.compiler'
 local err = require 'lace.error'
