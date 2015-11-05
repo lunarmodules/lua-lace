@@ -2,7 +2,7 @@
 --
 -- Lua Access Control Engine -- Tests for the compiler
 --
--- Copyright 2012 Daniel Silverstone <dsilvers@digital-scurf.org>
+-- Copyright 2012,2015 Daniel Silverstone <dsilvers@digital-scurf.org>
 --
 -- For Licence terms, see COPYING
 --
@@ -373,6 +373,11 @@ function suite.error_in_include2()
    assert(line2 == "real-errorininclude2 :: 3", "The second line is where the error happened")
    assert(line3 == "include errorininclude2-NOTFOUND", "The third line is the original line")
    assert(line4 == "        ^^^^^^^^^^^^^^^^^^^^^^^^", "The fourth line highlights relevant words")
+end
+
+function suite.defaults_propagate()
+   local result, msg = compiler.compile(comp_context, "defaults_propagate")
+   assert(result, msg)
 end
 
 local count_ok = 0

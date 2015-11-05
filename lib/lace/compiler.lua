@@ -2,7 +2,7 @@
 --
 -- Lua Access Control Engine - Ruleset compiler
 --
--- Copyright 2012 Daniel Silverstone <dsilvers@digital-scurf.org>
+-- Copyright 2012,2015 Daniel Silverstone <dsilvers@digital-scurf.org>
 --
 -- For licence terms, see COPYING
 --
@@ -152,7 +152,7 @@ local function internal_compile_ruleset(compcontext, sourcename, content, suppre
    --     in which case use the default
    --   There's no unconditional result and no default, fake up a default and
    --     then use it.
-   if not suppress_default and not uncond and not result then
+   if not suppress_default and not uncond and not result and not compcontext._lace.default then
       local _, nores = err.error("No result set whatsoever", {})
       return false, err.augment(nores, ruleset.content, #ruleset.content.lines + 1)
    end
