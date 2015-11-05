@@ -14,6 +14,8 @@ pcall(require, 'luacov')
 local builtin = require 'lace.builtin'
 local engine = require 'lace.engine'
 
+local unpack = unpack or table.unpack
+
 local testnames = {}
 
 local real_assert = assert

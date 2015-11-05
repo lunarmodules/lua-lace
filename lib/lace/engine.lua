@@ -15,6 +15,8 @@
 
 local err = require 'lace.error'
 
+local unpack = unpack or table.unpack
+
 local function _dlace(ctx)
    local ret = ctx._lace or {}
    ctx._lace = ret
