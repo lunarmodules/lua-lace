@@ -75,7 +75,11 @@ local function compile_one_line(compcontext, line)
       args[i] = line.content[i].str
    end
 
-   return cmdfn(compcontext, unpack(args))
+   local linerule, err = cmdfn(compcontext, unpack(args))
+   if type(linerule) ~= "table" then
+      return linerule, err
+   end
+   return {linerule}, err
 end
 
 --- Internal ruleset compilation.
@@ -133,13 +137,16 @@ local function internal_compile_ruleset(compcontext, sourcename, content, suppre
       if line.type == "rule" then
 	 -- worth trying to parse a rule
 	 _setposition(compcontext, ruleset, i)
-	 local rule, msg = compile_one_line(compcontext, line)
-	 if type(rule) ~= "table" then
-	    return rule, err.augment(msg, ruleset.content, i)
+	 local rules, msg = compile_one_line(compcontext, line)
+	 if type(rules) ~= "table" then
+	    return rules, err.augment(msg, ruleset.content, i)
 	 end
-	 rule.linenr = i
-	 rule.source = ruleset.content
-	 ruleset.rules[#ruleset.rules+1] = rule
+	 for j = 1, #rules do
+	    local rule = rules[j]
+	    rule.linenr = i
+	    rule.source = ruleset.content
+	    ruleset.rules[#ruleset.rules+1] = rule
+	 end
       end
    end
 
