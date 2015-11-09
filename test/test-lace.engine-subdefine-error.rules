@@ -1,0 +1,2 @@
+deny "Boo" {equal jeff geoff}
+allow "Yay" {error}

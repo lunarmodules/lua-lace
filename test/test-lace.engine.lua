@@ -245,6 +245,27 @@ function suite.unknownanyof()
    assert(line4 == "             ^^^^", "The fourth line highlights relevant words")
 end
 
+function suite.subdefine_works()
+   local ruleset, msg = lace.compiler.compile(comp_context, "subdefine-works")
+   assert(type(ruleset) == "table", "Ruleset did not compile")
+   local ectx = {jeff = "geoff"}
+   local result, msg = lace.engine.run(ruleset, ectx)
+   assert(result, msg)
+end
+
+function suite.subdefine_err_reported()
+   local ruleset, msg = lace.compiler.compile(comp_context, "subdefine-error")
+   assert(type(ruleset) == "table", "Ruleset did not compile")
+   local ectx = {error = true}
+   local result, msg = lace.engine.run(ruleset, ectx)
+   assert(result == false, "Did not error out")
+   local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
+   assert(line1 == "woah", "The first line must mention the error")
+   assert(line2 == "real-subdefine-error :: 2", "The second line is where the error happened")
+   assert(line3 == 'allow "Yay" {error}', "The third line is the original line")
+   assert(line4 == "            ^^^^^^^", "The fourth line highlights relevant words")
+end
+
 local count_ok = 0
 for _, testname in ipairs(testnames) do
 --   print("Run: " .. testname)

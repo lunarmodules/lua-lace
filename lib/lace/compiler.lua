@@ -71,15 +71,40 @@ local function compile_one_line(compcontext, line)
    end
 
    local args = {}
+   local rules = {}
    for i = 1, #line.content do
-      args[i] = line.content[i].str
+      if line.content[i].sub then
+	 -- We have encountered a subdefine
+	 -- We thusly need to magically construct a define.
+	 local sub = line.content[i].sub
+	 local defnr = compcontext._lace.magic_define_nr
+	 local definename = "__autodef"..tostring(defnr)
+	 compcontext._lace.magic_define_nr = defnr + 1
+	 local definefn = _command(compcontext, "define")
+	 local subargs = {}
+	 for j = 1, #sub do
+	    subargs[j] = sub[j].str or "{}"
+	 end
+	 local definerule, err = definefn(compcontext, "define", definename,
+					  unpack(subargs))
+	 if type(definerule) ~= "table" then
+	    -- for now, we lock the error to the whole sublex
+	    err.words = {i}
+	    return definerule, err
+	 end
+	 args[i] = definename
+	 rules[#rules+1] = definerule
+      else
+	 args[i] = line.content[i].str
+      end
    end
 
    local linerule, err = cmdfn(compcontext, unpack(args))
    if type(linerule) ~= "table" then
       return linerule, err
    end
-   return {linerule}, err
+   rules[#rules+1] = linerule
+   return rules, err
 end
 
 --- Internal ruleset compilation.
@@ -212,6 +237,7 @@ local function compile_ruleset(ctx, src, cnt)
 	 }
       }
       ctx._lace.linenr = 1
+      ctx._lace.magic_define_nr = 1
    end
    local ok, ret, msg = xpcall(function() 
 				  return internal_compile_ruleset(ctx, src, cnt) 

@@ -143,6 +143,14 @@ local comp_context = {
 	 nocompile = function()
 			return err.error("NOCOMPILE", {2})
 		     end,
+	 equal = function(ctx, eq, key, value)
+		    return {
+		       fn = function(ectx, ekey, evalue)
+			       return ectx[ekey] == evalue
+			    end,
+		       args = { key, value },
+		    }
+		 end,
       },
    },
 }
@@ -377,6 +385,11 @@ end
 
 function suite.defaults_propagate()
    local result, msg = compiler.compile(comp_context, "defaults_propagate")
+   assert(result, msg)
+end
+
+function suite.okay_subdefine()
+   local result, msg = compiler.compile(comp_context, "subdefine1")
    assert(result, msg)
 end
 
