@@ -15,7 +15,7 @@
 
 local M = {}
 
-local function _lex_one_line(line)
+local function _lex_one_line(line, terminator)
    local r = {}
    local acc = ""
    local c
@@ -40,7 +40,10 @@ local function _lex_one_line(line)
 	 end
 	 escaping = false
       else
-	 if c == "'" and quoting == false then
+	 if c == terminator and quoting == false then
+	    -- Reached the terminator, break out
+	    break
+	 elseif c == "'" and quoting == false then
 	    -- Start single quotes
 	    quoting = c
 	    force_empty = true
@@ -88,7 +91,7 @@ local function _lex_one_line(line)
       warnings[#warnings+1] = "Un-used escape at end"
    end
 
-   return r, warnings
+   return r, line, warnings
 end
 
 local lexer_line_cache = {}
@@ -97,7 +100,7 @@ local function lex_one_line(line)
    if not lexer_line_cache[line] then
       lexer_line_cache[line] = { _lex_one_line(line) }
    end
-   return lexer_line_cache[line][1], lexer_line_cache[line][2]
+   return lexer_line_cache[line][1], lexer_line_cache[line][2], lexer_line_cache[line][3]
 end
 
 local cached_full_lexes = {}
@@ -129,7 +132,8 @@ function M.string(ruleset, sourcename)
 	 linetab.type = "whitespace"
       else
 	 linetab.type = "rule"
-	 linetab.content, warn = lex_one_line(oneline)
+	 linetab.content, rest_of_line, warn = lex_one_line(oneline)
+	 assert(rest_of_line == "", "Content left after line lexing")
 	 if #warn > 0 then
 	    linetab.warnings = warn
 	 end
