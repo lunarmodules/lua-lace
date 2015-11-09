@@ -268,6 +268,25 @@ function suite.empty_string_words_work()
    assert(content.lines[1].content[2].spos == 7, "The empty word starts at the seventh character")
 end
 
+function suite.braced_sections_sublex()
+   local content = assert(lex.string("foo {bar baz} meta", "SRC"))
+   assert(content.source == "SRC", "Source name not propagated")
+   assert(type(content.lines) == "table", "Lines is not a table")
+   assert(#content.lines == 1, "There should have been one line")
+   assert(#content.lines[1].content == 3, "The line should have 3 words")
+   assert(content.lines[1].content[1].spos == 1, "The first word starts at the first character")
+   assert(content.lines[1].content[1].str == "foo", "The word is \"foo\"")
+   assert(content.lines[1].content[3].spos == 15, "The third word starts at the first character")
+   assert(content.lines[1].content[3].str == "meta", "The word is \"foo\"")
+   -- Now the sublex...
+   assert(content.lines[1].content[2].sub, "The second word is a sublex")
+   assert(#content.lines[1].content[2].sub == 2, "The sublex should have 2 words")
+   assert(content.lines[1].content[2].sub[1].str == "bar", "The sublex first word should be bar")
+   assert(content.lines[1].content[2].sub[2].str == "baz", "The sublex first word should be bar")
+   assert(content.lines[1].content[2].spos == 5, "The sublex starts at location 5")
+   assert(content.lines[1].content[2].epos == 13, "The sublex ends at location 13")
+end
+
 local count_ok = 0
 for _, testname in ipairs(testnames) do
 --   print("Run: " .. testname)

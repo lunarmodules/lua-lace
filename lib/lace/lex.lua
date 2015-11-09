@@ -15,6 +15,10 @@
 
 local M = {}
 
+local lexer_line_cache = {}
+
+local lex_one_line
+
 local function _lex_one_line(line, terminator)
    local r = {}
    local acc = ""
@@ -51,6 +55,17 @@ local function _lex_one_line(line, terminator)
 	    -- Start double quotes
 	    quoting = c
 	    force_empty = true
+	 elseif c == '{' and quoting == false then
+	    if acc == "" then
+	       -- Something worth lexing
+	       local ltab, rest, warns = lex_one_line(line, "}")
+	       -- For now, assume the accumulator is good enough
+	       cpos = cpos + #line - #rest
+	       r[#r+1] = { spos = spos, epos = cpos, sub = ltab }
+	       spos = cpos + 1
+	       line = rest
+	       acc = ""
+	    end
 	 elseif c == "'" and quoting == c then
 	    -- End single quotes
 	    quoting = false
@@ -94,13 +109,12 @@ local function _lex_one_line(line, terminator)
    return r, line, warnings
 end
 
-local lexer_line_cache = {}
-
-local function lex_one_line(line)
-   if not lexer_line_cache[line] then
-      lexer_line_cache[line] = { _lex_one_line(line) }
+function lex_one_line(line, terminator)
+   local tag = line .. "\n" .. tostring(terminator)
+   if not lexer_line_cache[tag] then
+      lexer_line_cache[tag] = { _lex_one_line(line, terminator) }
    end
-   return lexer_line_cache[line][1], lexer_line_cache[line][2], lexer_line_cache[line][3]
+   return lexer_line_cache[tag][1], lexer_line_cache[tag][2], lexer_line_cache[tag][3]
 end
 
 local cached_full_lexes = {}
