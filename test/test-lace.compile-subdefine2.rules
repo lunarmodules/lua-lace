@@ -1,0 +1,1 @@
+allow "OK" {anyof {equal user daniel} {equal user geoff}}

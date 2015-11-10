@@ -61,6 +61,36 @@ local function _setposition(context, ruleset, linenr)
    context._lace.linenr = linenr
 end
 
+local function transfer_args(compcontext, content, rules)
+   local args, err = {}
+   for i = 1, #content do
+      if content[i].sub then
+	 local sub = content[i].sub
+	 local defnr = compcontext._lace.magic_define_nr
+	 local definename = "__autodef"..tostring(defnr)
+	 compcontext._lace.magic_define_nr = defnr + 1
+	 local definefn = _command(compcontext, "define")
+	 local subargs
+	 rules, subargs = transfer_args(compcontext, sub, rules)
+	 if type(rules) ~= "table" then
+	    return rules, subargs
+	 end
+	 local definerule, err = definefn(compcontext, "define", definename,
+					  unpack(subargs))
+	 if type(definerule) ~= "table" then
+	    -- for now, we lock the error to the whole sublex
+	    err.words = {i}
+	    return definerule, err
+	 end
+	 args[#args+1] = definename
+	 rules[#rules+1] = definerule
+      else
+	 args[#args+1] = content[i].str
+      end
+   end
+   return rules, args
+end
+
 local function compile_one_line(compcontext, line)
    -- The line is a rule, so we don't need to think about that.  The
    -- first entry is a command.
@@ -70,35 +100,11 @@ local function compile_one_line(compcontext, line)
       return err.error("Unknown command: " .. cmdname, {1})
    end
 
-   local args = {}
-   local rules = {}
-   for i = 1, #line.content do
-      if line.content[i].sub then
-	 -- We have encountered a subdefine
-	 -- We thusly need to magically construct a define.
-	 local sub = line.content[i].sub
-	 local defnr = compcontext._lace.magic_define_nr
-	 local definename = "__autodef"..tostring(defnr)
-	 compcontext._lace.magic_define_nr = defnr + 1
-	 local definefn = _command(compcontext, "define")
-	 local subargs = {}
-	 for j = 1, #sub do
-	    subargs[j] = sub[j].str or "{}"
-	 end
-	 local definerule, err = definefn(compcontext, "define", definename,
-					  unpack(subargs))
-	 if type(definerule) ~= "table" then
-	    -- for now, we lock the error to the whole sublex
-	    err.words = {i}
-	    return definerule, err
-	 end
-	 args[i] = definename
-	 rules[#rules+1] = definerule
-      else
-	 args[i] = line.content[i].str
-      end
+   local rules, args = transfer_args(compcontext, line.content, {})
+   if type(rules) ~= "table" then
+      return rules, args
    end
-
+   
    local linerule, err = cmdfn(compcontext, unpack(args))
    if type(linerule) ~= "table" then
       return linerule, err

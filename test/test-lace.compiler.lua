@@ -393,6 +393,11 @@ function suite.okay_subdefine()
    assert(result, msg)
 end
 
+function suite.okay_nested_subdefine()
+   local result, msg = compiler.compile(comp_context, "subdefine2")
+   assert(result, msg)
+end
+
 local count_ok = 0
 for _, testname in ipairs(testnames) do
 --   print("Run: " .. testname)

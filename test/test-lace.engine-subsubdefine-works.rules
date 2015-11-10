@@ -1,0 +1,1 @@
+allow "PASS" {anyof {equal jeff harry} {equal jeff geoff}}

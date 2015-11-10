@@ -1,0 +1,1 @@
+allow "FAIL" {anyof {equal jeff banana} {error}}
