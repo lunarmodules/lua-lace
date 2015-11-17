@@ -269,7 +269,7 @@ function suite.empty_string_words_work()
 end
 
 function suite.braced_sections_sublex()
-   local content = assert(lex.string("foo {bar baz} meta", "SRC"))
+   local content = assert(lex.string("foo [bar baz] meta", "SRC"))
    assert(content.source == "SRC", "Source name not propagated")
    assert(type(content.lines) == "table", "Lines is not a table")
    assert(#content.lines == 1, "There should have been one line")

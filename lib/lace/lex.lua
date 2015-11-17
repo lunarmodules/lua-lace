@@ -55,10 +55,10 @@ local function _lex_one_line(line, terminator)
 	    -- Start double quotes
 	    quoting = c
 	    force_empty = true
-	 elseif c == '{' and quoting == false then
+	 elseif c == '[' and quoting == false then
 	    if acc == "" then
 	       -- Something worth lexing
-	       local ltab, rest, warns = lex_one_line(line, "}")
+	       local ltab, rest, warns = lex_one_line(line, "]")
 	       -- For now, assume the accumulator is good enough
 	       cpos = cpos + #line - #rest
 	       r[#r+1] = { spos = spos, epos = cpos, sub = ltab }

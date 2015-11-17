@@ -1,1 +1,1 @@
-allow "Hurrah" {equal jeff}
+allow "Hurrah" [equal jeff]

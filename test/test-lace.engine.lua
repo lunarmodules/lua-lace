@@ -262,7 +262,7 @@ function suite.subdefine_err_reported()
    local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
    assert(line1 == "woah", "The first line must mention the error")
    assert(line2 == "real-subdefine-error :: 2", "The second line is where the error happened")
-   assert(line3 == 'allow "Yay" {error}', "The third line is the original line")
+   assert(line3 == 'allow "Yay" [error]', "The third line is the original line")
    assert(line4 == "            ^^^^^^^", "The fourth line highlights relevant words")
 end
 
@@ -285,7 +285,7 @@ function suite.subsubdefine_err_reported()
    local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
    assert(line1 == "woah", "The first line must mention the error")
    assert(line2 == "real-subsubdefine-error :: 1", "The second line is where the error happened")
-   assert(line3 == 'allow "FAIL" {anyof {equal jeff banana} {error}}', "The third line is the original line")
+   assert(line3 == 'allow "FAIL" [anyof [equal jeff banana] [error]]', "The third line is the original line")
    assert(line4 == "             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", "The fourth line highlights relevant words")
 end
 

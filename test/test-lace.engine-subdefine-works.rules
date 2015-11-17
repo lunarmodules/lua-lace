@@ -1,2 +1,2 @@
 default deny
-allow "PASS" {equal jeff geoff}
+allow "PASS" [equal jeff geoff]

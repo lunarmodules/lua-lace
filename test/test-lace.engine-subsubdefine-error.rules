@@ -1,1 +1,1 @@
-allow "FAIL" {anyof {equal jeff banana} {error}}
+allow "FAIL" [anyof [equal jeff banana] [error]]
