@@ -49,7 +49,12 @@ local function _offset(err, offs)
       err.words = {}
    end
    for k, w in ipairs(err.words) do
-      err.words[k] = w + offs
+      if type(w) == "table" then
+         nr = w.nr
+         err.words[k] = {nr = nr + offs, sub=w.sub}
+      else
+         err.words[k] = w + offs
+      end
    end
    return err
 end
@@ -96,9 +101,18 @@ local function _render(err)
    ret[3] = srcline.original
    -- The fourth line is the highlight for each word in question
    local wordset = {}
-   for _, word in ipairs(err.words) do
-      wordset[word] = true
+   local function build_wordset(words, wordset)
+      for _, word in ipairs(words) do
+         if type(word) ~= "table" then
+            wordset[word] = true
+         else
+            local subwordset = {}
+            build_wordset(word.sub, subwordset)
+            wordset[word.nr] = subwordset
+         end
+      end
    end
+   build_wordset(err.words, wordset)
    local hlstr = ""
    local cpos = 1
    for w, info in ipairs(srcline.content) do
