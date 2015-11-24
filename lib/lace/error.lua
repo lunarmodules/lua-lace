@@ -49,7 +49,12 @@ local function _offset(err, offs)
       err.words = {}
    end
    for k, w in ipairs(err.words) do
-      err.words[k] = w + offs
+      if type(w) == "table" then
+         nr = w.nr
+         err.words[k] = {nr = nr + offs, sub=w.sub}
+      else
+         err.words[k] = w + offs
+      end
    end
    return err
 end
@@ -96,23 +101,55 @@ local function _render(err)
    ret[3] = srcline.original
    -- The fourth line is the highlight for each word in question
    local wordset = {}
-   for _, word in ipairs(err.words) do
-      wordset[word] = true
-   end
-   local hlstr = ""
-   local cpos = 1
-   for w, info in ipairs(srcline.content) do
-      -- Ensure that we're up to the start position of the word
-      while (cpos < info.spos) do
-	 hlstr = hlstr .. " "
-	 cpos = cpos + 1
-      end
-      -- Highlight this word if appropriate
-      while (cpos <= info.epos) do
-	 hlstr = hlstr .. (wordset[w] and "^" or " ")
-	 cpos = cpos + 1
+   local function build_wordset(words, wordset)
+      for _, word in ipairs(words) do
+         if type(word) ~= "table" then
+            wordset[word] = true
+         else
+            local subwordset = {}
+            build_wordset(word.sub, subwordset)
+            wordset[word.nr] = subwordset
+         end
       end
    end
+   build_wordset(err.words, wordset)
+
+   local function mark_my_words(line, wordset)
+      local hlstr, cpos = "", 1
+      for w, info in ipairs(line) do
+         -- Ensure that we're up to the start position of the word
+         while (cpos < info.spos) do
+            hlstr = hlstr .. " "
+            cpos = cpos + 1
+         end
+         -- TODO: The subword can be defined in a different line entirely,
+         --       at which point it's not a subword of word in this line.
+         --       This is the norm for explicit definitions.
+         --       Eventually we should trace back to the define's
+         --       definition and highlight where in that line the problem is.
+         if type(wordset[w]) == "table" and info.sub then
+            -- space for [
+            hlstr, cpos = hlstr .. " ", cpos + 1
+
+            -- mark subword
+            local subhlstr, subcpos = mark_my_words(info.sub, wordset[w])
+            hlstr = hlstr .. subhlstr
+            cpos = cpos + subcpos
+
+            -- space for ]
+            hlstr, cpos = hlstr .. " ", cpos + 1
+         else
+            -- Highlight this word if appropriate
+            while (cpos <= info.epos) do
+               hlstr = hlstr .. (wordset[w] and "^" or " ")
+               cpos = cpos + 1
+            end
+         end
+      end
+      return hlstr, cpos
+   end
+   local hlstr, _ = mark_my_words(srcline.content, wordset)
+
    ret[4] = hlstr
    -- The rendered error is those four strings joined by newlines
    return table.concat(ret, "\n")

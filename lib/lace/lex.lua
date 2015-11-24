@@ -46,6 +46,10 @@ local function _lex_one_line(line, terminator)
       else
 	 if c == terminator and quoting == false then
 	    -- Reached the terminator, break out
+	    -- The terminator is not actually part of the last word in the line
+	    -- so we push back that character,
+	    -- since it's the only case we actually need to put any back.
+	    cpos = cpos - 1
 	    break
 	 elseif c == "'" and quoting == false then
 	    -- Start single quotes

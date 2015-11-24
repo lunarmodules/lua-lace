@@ -35,7 +35,12 @@ local function run_conditions(exec_context, cond, anyof)
       end
       local res, msg = engine.test(exec_context, name)
       if res == nil then
-	 msg.words = {i}
+	 local subwords = msg.words
+	 if subwords and #subwords > 0 then
+	    msg.words = {{nr = i, sub = subwords}}
+	 else
+	    msg.words = {i}
+	 end
 	 return nil, msg
       end
       if invert then
@@ -208,7 +213,15 @@ local function _compile_any_all_of(compcontext, mtype, first, second, ...)
    end
 
    return {
-      fn = run_conditions,
+      fn = (function(exec_context, cond, anyof)
+         local pass, msg = run_conditions(exec_context, cond, anyof)
+         if pass == nil then
+            -- Offset error location by anyof/allof word
+            err.offset(msg, 1)
+            return nil, msg
+         end
+         return pass, msg
+      end),
       args = { { first, second, ...}, mtype == "anyof" }
    }
 end
