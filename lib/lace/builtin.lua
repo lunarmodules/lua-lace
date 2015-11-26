@@ -308,6 +308,9 @@ local function _do_include(exec_context, ruleset, conds)
    local result, msg = engine.internal_run(ruleset, exec_context)
    if result == "" then
       return true
+   elseif result == nil then
+      msg.words = {err.subwords(msg, 2)}
+      return nil, msg
    end
    return result, msg
 end
