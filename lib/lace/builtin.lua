@@ -186,9 +186,14 @@ function builtin.default(compcontext, def, result, reason, unwanted)
    if compcontext._lace.default then
       return err.error("Cannot change the default", {1, 2})
    end
-   
+
    local uncond, last = unconditional_result, last_result
-   compcontext._lace.default = _return(compcontext, result, reason)
+   local default_rule = _return(compcontext, result, reason)
+   -- Normally lace.compiler.internal_compile augments the rules with sources,
+   -- but since this rule is not returned, we have to augment it ourselves.
+   default_rule.source = compcontext._lace.source
+   default_rule.linenr = compcontext._lace.linenr
+   compcontext._lace.default = default_rule
    unconditional_result, last_result = uncond, last
 
    return {
