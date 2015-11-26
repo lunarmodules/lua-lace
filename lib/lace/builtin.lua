@@ -101,7 +101,9 @@ local function _do_return(exec_context, rule, result, reason, cond)
    local pass, msg = run_conditions(exec_context, cond)
    if pass == nil then
       -- Pass errors
-      err.offset(msg, 2)
+      msg = err.offset(msg, 2)
+      -- Record error source
+      msg = err.augment(msg, rule.source, rule.linenr)
       return nil, msg
    elseif pass == false then
       -- Conditions failed, return true to continue execution
@@ -209,7 +211,9 @@ local function _do_any_all_of(exec_context, rule, cond, anyof)
    local pass, msg = run_conditions(exec_context, cond, anyof)
    if pass == nil then
       -- Offset error location by anyof/allof word
-      err.offset(msg, 1)
+      msg = err.offset(msg, 1)
+      -- Record error source
+      msg = err.augment(msg, rule.source, rule.linenr)
       return nil, msg
    end
    return pass, msg
@@ -247,7 +251,12 @@ local function _controlfn(ctx, name)
 end
 
 local function _do_define(exec_context, rule, name, defn)
-   return engine.define(exec_context, name, defn)
+   local res, msg = engine.define(exec_context, name, defn)
+   if res == nil then
+      msg = err.augment(msg, rule.source, rule.linenr)
+      return nil, msg
+   end
+   return res, msg
 end
 
 --- Compile a definition command
@@ -280,7 +289,7 @@ function builtin.define(compcontext, define, name, controltype, ...)
    if type(controltype) ~= "string" then
       return err.error("Expected control type, got nothing", {1, 2})
    end
-   
+
    local controlfn = _controlfn(compcontext, controltype)
    if not controlfn then
       emsg = "%s's second parameter (%s) must be a control type such as anyof"
@@ -311,6 +320,7 @@ local function _do_include(exec_context, rule, ruleset, conds)
    if pass == nil then
       -- Propagate errors
       msg = err.offset(msg, 2)
+      msg = err.augment(msg, rule.source, rule.linenr)
       return nil, msg
    elseif pass == false then
       -- Conditions failed, return true to continue execution
@@ -322,6 +332,7 @@ local function _do_include(exec_context, rule, ruleset, conds)
       return true
    elseif result == nil then
       msg.words = {err.subwords(msg, 2)}
+      msg = err.augment(msg, rule.source, rule.linenr)
       return nil, msg
    end
    return result, msg
