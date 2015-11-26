@@ -204,6 +204,16 @@ end
 
 --[ Control types ]--------------------------------------------------
 
+local function _do_any_all_of(...)
+   local pass, msg = run_conditions(...)
+   if pass == nil then
+      -- Offset error location by anyof/allof word
+      err.offset(msg, 1)
+      return nil, msg
+   end
+   return pass, msg
+end
+
 local function _compile_any_all_of(compcontext, mtype, first, second, ...)
    if type(first) ~= "string" then
       return err.error("Expected at least two names, got none", {1})
@@ -213,15 +223,7 @@ local function _compile_any_all_of(compcontext, mtype, first, second, ...)
    end
 
    return {
-      fn = (function(exec_context, cond, anyof)
-         local pass, msg = run_conditions(exec_context, cond, anyof)
-         if pass == nil then
-            -- Offset error location by anyof/allof word
-            err.offset(msg, 1)
-            return nil, msg
-         end
-         return pass, msg
-      end),
+      fn = _do_any_all_of,
       args = { { first, second, ...}, mtype == "anyof" }
    }
 end
