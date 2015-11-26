@@ -35,12 +35,7 @@ local function run_conditions(exec_context, cond, anyof)
       end
       local res, msg = engine.test(exec_context, name)
       if res == nil then
-	 local subwords = msg.words
-	 if subwords and #subwords > 0 then
-	    msg.words = {{nr = i, sub = subwords}}
-	 else
-	    msg.words = {i}
-	 end
+	 msg.words = {err.subwords(msg, i)}
 	 return nil, msg
       end
       if invert then

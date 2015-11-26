@@ -76,6 +76,15 @@ local function _augment(err, source, linenr)
    return err
 end
 
+local function _subwords(err, word)
+   local subwords = err.words
+   if subwords and #subwords > 0 then
+      return {nr = word, sub = subwords}
+   else
+      return word
+   end
+end
+
 --- Render an error down to a string.
 --
 -- Error tables carry a message, an optional set of words which caused the
@@ -159,5 +168,6 @@ return {
    error = _error,
    offset = _offset,
    augment = _augment,
+   subwords = _subwords,
    render = _render,
 }
