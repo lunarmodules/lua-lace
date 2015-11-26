@@ -83,9 +83,9 @@ function suite.no_unconditional_action()
    -- rule 2 should be an unconditional allow with 'Default behaviour' as the reason,
    -- let's check
    local r2a = result.rules[2].args
-   assert(r2a[1] == "allow", "Rule 2 should be an allow")
-   assert(r2a[2] == "Default behaviour", "Rule 2's reason should be 'Default behaviour'")
-   assert(#r2a[3] == 0, "Rule 2 should have no conditions")
+   assert(r2a[2] == "allow", "Rule 2 should be an allow")
+   assert(r2a[3] == "Default behaviour", "Rule 2's reason should be 'Default behaviour'")
+   assert(#r2a[4] == 0, "Rule 2 should have no conditions")
 end
 
 function suite.no_unconditional_action_default_deny()
@@ -99,9 +99,9 @@ function suite.no_unconditional_action_default_deny()
    -- rule 3 should be an unconditional deny with 'Default behaviour' as the reason,
    -- let's check
    local r3a = result.rules[3].args
-   assert(r3a[1] == "deny", "Rule 3 should be a deny, despite last rule behind a deny")
-   assert(r3a[2] == "Default behaviour", "Rule 3's reason should be 'Default behaviour'")
-   assert(#r3a[3] == 0, "Rule 2 should have no conditions")
+   assert(r3a[2] == "deny", "Rule 3 should be a deny, despite last rule behind a deny")
+   assert(r3a[3] == "Default behaviour", "Rule 3's reason should be 'Default behaviour'")
+   assert(#r3a[4] == 0, "Rule 3 should have no conditions")
 end
 
 function suite.is_unconditional_action_default_deny()
@@ -115,9 +115,9 @@ function suite.is_unconditional_action_default_deny()
    -- rule 2 should be an unconditional allow with 'stuff' as the reason
    -- let's check
    local r2a = result.rules[2].args
-   assert(r2a[1] == "allow", "Rule 2 should be an allow, despite default being deny")
-   assert(r2a[2] == "stuff", "Rule 2's reason should be 'stuff'")
-   assert(#r2a[3] == 0, "Rule 2 should have no conditions")
+   assert(r2a[2] == "allow", "Rule 2 should be an allow, despite default being deny")
+   assert(r2a[3] == "stuff", "Rule 2's reason should be 'stuff'")
+   assert(#r2a[4] == 0, "Rule 2 should have no conditions")
 end
 
 -- Now we set up a more useful context and use that going forward:

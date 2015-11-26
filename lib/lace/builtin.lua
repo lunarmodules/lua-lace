@@ -97,7 +97,7 @@ local function get_set_last_result(newv)
    return ret
 end
 
-local function _do_return(exec_context, result, reason, cond)
+local function _do_return(exec_context, rule, result, reason, cond)
    local pass, msg = run_conditions(exec_context, cond)
    if pass == nil then
       -- Pass errors
@@ -139,10 +139,11 @@ local function _return(compcontext, result, reason, ...)
    end
    last_result = result
 
-   return {
+   local rule = {
       fn = _do_return,
-      args = { result, reason, cond }
    }
+   rule.args = { rule, result, reason, cond }
+   return rule
 end
 
 builtin.allow = _return
@@ -204,8 +205,8 @@ end
 
 --[ Control types ]--------------------------------------------------
 
-local function _do_any_all_of(...)
-   local pass, msg = run_conditions(...)
+local function _do_any_all_of(exec_context, rule, cond, anyof)
+   local pass, msg = run_conditions(exec_context, cond, anyof)
    if pass == nil then
       -- Offset error location by anyof/allof word
       err.offset(msg, 1)
@@ -222,10 +223,11 @@ local function _compile_any_all_of(compcontext, mtype, first, second, ...)
       return err.error("Expected at least two names, only got one", {1, 2})
    end
 
-   return {
+   local rule =  {
       fn = _do_any_all_of,
-      args = { { first, second, ...}, mtype == "anyof" }
    }
+   rule.args = { rule, { first, second, ...}, mtype == "anyof" }
+   return rule
 end
 
 local builtin_control_fn = {
@@ -242,6 +244,10 @@ local function _controlfn(ctx, name)
       cfn = builtin_control_fn[name]
    end
    return cfn
+end
+
+local function _do_define(exec_context, rule, name, defn)
+   return engine.define(exec_context, name, defn)
 end
 
 --- Compile a definition command
@@ -289,17 +295,18 @@ function builtin.define(compcontext, define, name, controltype, ...)
    end
 
    -- Successfully created a control table, return a rule for it
-   return {
-      fn = engine.define,
-      args = { name, ctrltab }
+   local rule = {
+      fn = _do_define,
    }
+   rule.args = { rule, name, ctrltab }
+   return rule
 end
 
 builtin.def = builtin.define
 
 --[ Inclusion of rulesets ]-------------------------------------------
 
-local function _do_include(exec_context, ruleset, conds)
+local function _do_include(exec_context, rule, ruleset, conds)
    local pass, msg = run_conditions(exec_context, conds)
    if pass == nil then
       -- Propagate errors
@@ -374,10 +381,11 @@ function builtin.include(comp_context, cmd, file, ...)
    end
    
    -- Okay, we parsed, so build the runtime
-   return {
+   local rule = {
       fn = _do_include,
-      args = { ruleset, conds }
    }
+   rule.args = { rule, ruleset, conds }
+   return rule
 end
 
 return {
