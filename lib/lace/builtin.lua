@@ -302,7 +302,8 @@ builtin.def = builtin.define
 local function _do_include(exec_context, ruleset, conds)
    local pass, msg = run_conditions(exec_context, conds)
    if pass == nil then
-      -- Pass errors
+      -- Propagate errors
+      msg = err.offset(msg, 2)
       return nil, msg
    elseif pass == false then
       -- Conditions failed, return true to continue execution
