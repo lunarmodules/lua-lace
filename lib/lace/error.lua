@@ -71,8 +71,8 @@ end
 -- @treturn table The error table (mutated with the source information).
 -- @function augment
 local function _augment(err, source, linenr)
-   err.source = source
-   err.linenr = linenr
+   err.words.source = source
+   err.words.linenr = linenr
    return err
 end
 
@@ -102,9 +102,9 @@ local function _render(err)
    -- The first line is the error message
    local ret = { err.msg }
    -- The second is the source filename and line
-   ret[2] = err.source.source .. " :: " .. tostring(err.linenr)
+   ret[2] = err.words.source.source .. " :: " .. tostring(err.words.linenr)
    -- The third line is the line of the input
-   local srcline = err.source.lines[err.linenr] or {
+   local srcline = err.words.source.lines[err.words.linenr] or {
       original = "???", content = { {spos = 1, epos = 3, str = "???"} }
    }
    ret[3] = srcline.original
