@@ -203,7 +203,7 @@ function suite.compile_builtin_define_badctype()
    assert(cmdtab == false, "Internal errors should return false")
    assert(type(msg) == "table", "Internal errors should return tables")
    assert(type(msg.msg) == "string", "Internal errors should have string messages")
-   assert(msg.msg:match("Unknown control"), "Expected error should mention unknown control type")
+   assert(msg.msg:match("must be a control type"), "Expected error should mention unknown control type")
 end
 
 function suite.compile_builtin_define_ctype_errors()

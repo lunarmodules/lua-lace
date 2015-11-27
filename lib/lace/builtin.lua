@@ -277,7 +277,8 @@ function builtin.define(compcontext, define, name, controltype, ...)
    
    local controlfn = _controlfn(compcontext, controltype)
    if not controlfn then
-      return err.error("Unknown control type: " .. controltype, {3})
+      emsg = "%s's second parameter (%s) must be a control type such as anyof"
+      return err.error(emsg:format(define, controltype), {3})
    end
 
    local ctrltab, msg = controlfn(compcontext, controltype, ...)
