@@ -62,7 +62,7 @@ local function _setposition(context, ruleset, linenr)
 end
 
 local function transfer_args(compcontext, content, rules)
-   local args, err = {}
+   local args = {}
    for i = 1, #content do
       if content[i].sub then
 	 local sub = content[i].sub
@@ -75,12 +75,12 @@ local function transfer_args(compcontext, content, rules)
 	 if type(rules) ~= "table" then
 	    return rules, subargs
 	 end
-	 local definerule, err = definefn(compcontext, "define", definename,
+	 local definerule, msg = definefn(compcontext, "define", definename,
 					  unpack(subargs))
 	 if type(definerule) ~= "table" then
 	    -- for now, we lock the error to the whole sublex
-	    err.words = {i}
-	    return definerule, err
+	    msg.words = {i}
+	    return definerule, msg
 	 end
 	 args[#args+1] = definename
 	 rules[#rules+1] = definerule
