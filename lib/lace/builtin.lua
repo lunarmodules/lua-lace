@@ -250,7 +250,22 @@ local function _controlfn(ctx, name)
    return cfn
 end
 
+local function wrap_call_definition_location(rule, defn)
+   local fn = defn.fn
+   function defn.fn(...)
+      local res, msg = fn(...)
+      if res == nil then
+         msg = err.offset(msg, 2)
+         msg = err.augment(msg, rule.source, rule.linenr)
+         return nil, msg
+      end
+      return res, msg
+   end
+   return defn
+end
+
 local function _do_define(exec_context, rule, name, defn)
+   defn = wrap_call_definition_location(rule, defn)
    local res, msg = engine.define(exec_context, name, defn)
    if res == nil then
       msg = err.augment(msg, rule.source, rule.linenr)
