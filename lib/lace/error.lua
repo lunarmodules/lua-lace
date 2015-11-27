@@ -101,14 +101,7 @@ local function _render(err)
    -- A rendered error has four lines
    -- The first line is the error message
    local ret = { err.msg }
-   -- The second is the source filename and line
-   ret[2] = err.words.source.source .. " :: " .. tostring(err.words.linenr)
-   -- The third line is the line of the input
-   local srcline = err.words.source.lines[err.words.linenr] or {
-      original = "???", content = { {spos = 1, epos = 3, str = "???"} }
-   }
-   ret[3] = srcline.original
-   -- The fourth line is the highlight for each word in question
+
    local wordset = {}
    local function build_wordset(words, wordset)
       for _, word in ipairs(words) do
@@ -123,6 +116,15 @@ local function _render(err)
    end
    build_wordset(err.words, wordset)
 
+   -- The second is the source filename and line
+   ret[2] = err.words.source.source .. " :: " .. tostring(err.words.linenr)
+   -- The third line is the line of the input
+   local srcline = err.words.source.lines[err.words.linenr] or {
+      original = "???", content = { {spos = 1, epos = 3, str = "???"} }
+   }
+   ret[3] = srcline.original
+
+   -- The fourth line is the highlight for each word in question
    local function mark_my_words(line, wordset)
       local hlstr, cpos = "", 1
       for w, info in ipairs(line) do
@@ -158,8 +160,8 @@ local function _render(err)
       return hlstr, cpos
    end
    local hlstr, _ = mark_my_words(srcline.content, wordset)
-
    ret[4] = hlstr
+
    -- The rendered error is those four strings joined by newlines
    return table.concat(ret, "\n")
 end
