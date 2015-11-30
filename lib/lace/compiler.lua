@@ -62,7 +62,7 @@ local function _setposition(context, ruleset, linenr)
 end
 
 local function transfer_args(compcontext, content, rules)
-   local args, err = {}
+   local args = {}
    for i = 1, #content do
       if content[i].sub then
 	 local sub = content[i].sub
@@ -75,13 +75,32 @@ local function transfer_args(compcontext, content, rules)
 	 if type(rules) ~= "table" then
 	    return rules, subargs
 	 end
-	 local definerule, err = definefn(compcontext, "define", definename,
+	 local definerule, msg = definefn(compcontext, "define", definename,
 					  unpack(subargs))
 	 if type(definerule) ~= "table" then
 	    -- for now, we lock the error to the whole sublex
-	    err.words = {i}
-	    return definerule, err
+	    msg.words = {i}
+	    return definerule, msg
 	 end
+
+         -- Fix up error location offset
+         -- The error words are offset by 2 because the "define" token and name,
+         -- but we're abusing the define command for something without those,
+         -- we are responsible for offsetting the errors back.
+         local bindname = definerule.fn
+         function definerule.fn(exec_context, rule, name, defn)
+            local fn = defn.fn
+            function defn.fn(...)
+               local res, msg = fn(...)
+               if res == nil then
+                  msg = err.offset(msg, -2)
+                  return nil, msg
+               end
+               return res, msg
+            end
+            return bindname(exec_context, rule, name, defn)
+         end
+
 	 args[#args+1] = definename
 	 rules[#rules+1] = definerule
       else

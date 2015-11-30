@@ -71,9 +71,18 @@ end
 -- @treturn table The error table (mutated with the source information).
 -- @function augment
 local function _augment(err, source, linenr)
-   err.source = source
-   err.linenr = linenr
+   err.words.source = source
+   err.words.linenr = linenr
    return err
+end
+
+local function _subwords(err, word)
+   local subwords = err.words
+   if subwords and #subwords > 0 then
+      return {nr = word, sub = subwords}
+   else
+      return word
+   end
 end
 
 --- Render an error down to a string.
@@ -92,27 +101,39 @@ local function _render(err)
    -- A rendered error has four lines
    -- The first line is the error message
    local ret = { err.msg }
-   -- The second is the source filename and line
-   ret[2] = err.source.source .. " :: " .. tostring(err.linenr)
-   -- The third line is the line of the input
-   local srcline = err.source.lines[err.linenr] or {
-      original = "???", content = { {spos = 1, epos = 3, str = "???"} }
-   }
-   ret[3] = srcline.original
-   -- The fourth line is the highlight for each word in question
+
    local wordset = {}
-   local function build_wordset(words, wordset)
+   local function build_wordset(words, wordset, parent_source, parent_linenr)
+      wordset.source = words.source or source
+      wordset.linenr = words.linenr or linenr
       for _, word in ipairs(words) do
          if type(word) ~= "table" then
             wordset[word] = true
          else
             local subwordset = {}
-            build_wordset(word.sub, subwordset)
+            build_wordset(word.sub, subwordset, wordset.source, wordset.linenr)
             wordset[word.nr] = subwordset
          end
       end
    end
    build_wordset(err.words, wordset)
+
+   local linelist = {}
+   local function build_linelist(wordset, parent_source, parent_linenr)
+      if parent_source ~= wordset.source or parent_linenr ~= wordset.linenr then
+         linelist[#linelist+1] = wordset
+      end
+      local srcline = wordset.source.lines[wordset.linenr] or {
+         original = "???", content = { {spos = 1, epos = 3, str = "???"} }
+      }
+      for w, info in ipairs(srcline.content) do
+         -- TODO: Sometimes wordset is table, but token has no subwords.
+         if type(wordset[w]) == "table" and info.sub then
+            build_linelist(wordset[w], wordset.source, wordset.linenr)
+         end
+      end
+   end
+   build_linelist(wordset)
 
    local function mark_my_words(line, wordset)
       local hlstr, cpos = "", 1
@@ -122,12 +143,12 @@ local function _render(err)
             hlstr = hlstr .. " "
             cpos = cpos + 1
          end
-         -- TODO: The subword can be defined in a different line entirely,
-         --       at which point it's not a subword of word in this line.
-         --       This is the norm for explicit definitions.
-         --       Eventually we should trace back to the define's
-         --       definition and highlight where in that line the problem is.
-         if type(wordset[w]) == "table" and info.sub then
+         --  The subword can be defined in a different line entirely,
+         --  at which point it's not a subword of word in this line.
+         --  This is the norm for explicit definitions.
+         if info.sub and type(wordset[w]) == "table"
+         and wordset[w].source == wordset.source
+         and wordset[w].linenr == wordset.linenr then
             -- space for [
             hlstr, cpos = hlstr .. " ", cpos + 1
 
@@ -148,10 +169,18 @@ local function _render(err)
       end
       return hlstr, cpos
    end
-   local hlstr, _ = mark_my_words(srcline.content, wordset)
 
-   ret[4] = hlstr
-   -- The rendered error is those four strings joined by newlines
+   for _, wordset in ipairs(linelist) do
+      ret[#ret+1] = wordset.source.source .. " :: " .. tostring(wordset.linenr)
+      local srcline = wordset.source.lines[wordset.linenr] or {
+         original = "???", content = { {spos = 1, epos = 3, str = "???"} }
+      }
+      ret[#ret+1] = srcline.original
+      local hlstr, _ = mark_my_words(srcline.content, wordset)
+      ret[#ret+1] = hlstr
+   end
+
+   -- The rendered error is those strings joined by newlines
    return table.concat(ret, "\n")
 end
 
@@ -159,5 +188,6 @@ return {
    error = _error,
    offset = _offset,
    augment = _augment,
+   subwords = _subwords,
    render = _render,
 }

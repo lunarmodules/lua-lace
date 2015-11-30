@@ -1,0 +1,2 @@
+define bogus error
+allow "FAIL" [anyof [equal jeff banana] bogus]

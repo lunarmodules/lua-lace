@@ -52,8 +52,8 @@ function suite.error_augmentation()
    local src = {}
    local aug = error.augment(err, src, 10)
    assert(aug == err, "Augmentation should return the error")
-   assert(err.source == src, "Augmented errors should contain their source data")
-   assert(err.linenr == 10, "Augmented errors should contain their error line")
+   assert(err.words.source == src, "Augmented errors should contain their source data")
+   assert(err.words.linenr == 10, "Augmented errors should contain their error line")
 end
 
 function suite.error_render()

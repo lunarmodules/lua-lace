@@ -35,12 +35,7 @@ local function run_conditions(exec_context, cond, anyof)
       end
       local res, msg = engine.test(exec_context, name)
       if res == nil then
-	 local subwords = msg.words
-	 if subwords and #subwords > 0 then
-	    msg.words = {{nr = i, sub = subwords}}
-	 else
-	    msg.words = {i}
-	 end
+	 msg.words = {err.subwords(msg, i)}
 	 return nil, msg
       end
       if invert then
@@ -102,11 +97,13 @@ local function get_set_last_result(newv)
    return ret
 end
 
-local function _do_return(exec_context, result, reason, cond)
+local function _do_return(exec_context, rule, result, reason, cond)
    local pass, msg = run_conditions(exec_context, cond)
    if pass == nil then
       -- Pass errors
-      err.offset(msg, 2)
+      msg = err.offset(msg, 2)
+      -- Record error source
+      msg = err.augment(msg, rule.source, rule.linenr)
       return nil, msg
    elseif pass == false then
       -- Conditions failed, return true to continue execution
@@ -144,10 +141,11 @@ local function _return(compcontext, result, reason, ...)
    end
    last_result = result
 
-   return {
+   local rule = {
       fn = _do_return,
-      args = { result, reason, cond }
    }
+   rule.args = { rule, result, reason, cond }
+   return rule
 end
 
 builtin.allow = _return
@@ -191,9 +189,14 @@ function builtin.default(compcontext, def, result, reason, unwanted)
    if compcontext._lace.default then
       return err.error("Cannot change the default", {1, 2})
    end
-   
+
    local uncond, last = unconditional_result, last_result
-   compcontext._lace.default = _return(compcontext, result, reason)
+   local default_rule = _return(compcontext, result, reason)
+   -- Normally lace.compiler.internal_compile augments the rules with sources,
+   -- but since this rule is not returned, we have to augment it ourselves.
+   default_rule.source = compcontext._lace.source
+   default_rule.linenr = compcontext._lace.linenr
+   compcontext._lace.default = default_rule
    unconditional_result, last_result = uncond, last
 
    return {
@@ -204,6 +207,18 @@ end
 
 --[ Control types ]--------------------------------------------------
 
+local function _do_any_all_of(exec_context, rule, cond, anyof)
+   local pass, msg = run_conditions(exec_context, cond, anyof)
+   if pass == nil then
+      -- Offset error location by anyof/allof word
+      msg = err.offset(msg, 1)
+      -- Record error source
+      msg = err.augment(msg, rule.source, rule.linenr)
+      return nil, msg
+   end
+   return pass, msg
+end
+
 local function _compile_any_all_of(compcontext, mtype, first, second, ...)
    if type(first) ~= "string" then
       return err.error("Expected at least two names, got none", {1})
@@ -212,18 +227,11 @@ local function _compile_any_all_of(compcontext, mtype, first, second, ...)
       return err.error("Expected at least two names, only got one", {1, 2})
    end
 
-   return {
-      fn = (function(exec_context, cond, anyof)
-         local pass, msg = run_conditions(exec_context, cond, anyof)
-         if pass == nil then
-            -- Offset error location by anyof/allof word
-            err.offset(msg, 1)
-            return nil, msg
-         end
-         return pass, msg
-      end),
-      args = { { first, second, ...}, mtype == "anyof" }
+   local rule =  {
+      fn = _do_any_all_of,
    }
+   rule.args = { rule, { first, second, ...}, mtype == "anyof" }
+   return rule
 end
 
 local builtin_control_fn = {
@@ -240,6 +248,30 @@ local function _controlfn(ctx, name)
       cfn = builtin_control_fn[name]
    end
    return cfn
+end
+
+local function wrap_call_definition_location(rule, defn)
+   local fn = defn.fn
+   function defn.fn(...)
+      local res, msg = fn(...)
+      if res == nil then
+         msg = err.offset(msg, 2)
+         msg = err.augment(msg, rule.source, rule.linenr)
+         return nil, msg
+      end
+      return res, msg
+   end
+   return defn
+end
+
+local function _do_define(exec_context, rule, name, defn)
+   defn = wrap_call_definition_location(rule, defn)
+   local res, msg = engine.define(exec_context, name, defn)
+   if res == nil then
+      msg = err.augment(msg, rule.source, rule.linenr)
+      return nil, msg
+   end
+   return res, msg
 end
 
 --- Compile a definition command
@@ -272,10 +304,11 @@ function builtin.define(compcontext, define, name, controltype, ...)
    if type(controltype) ~= "string" then
       return err.error("Expected control type, got nothing", {1, 2})
    end
-   
+
    local controlfn = _controlfn(compcontext, controltype)
    if not controlfn then
-      return err.error("Unknown control type: " .. controltype, {3})
+      emsg = "%s's second parameter (%s) must be a control type such as anyof"
+      return err.error(emsg:format(define, controltype), {3})
    end
 
    local ctrltab, msg = controlfn(compcontext, controltype, ...)
@@ -286,20 +319,23 @@ function builtin.define(compcontext, define, name, controltype, ...)
    end
 
    -- Successfully created a control table, return a rule for it
-   return {
-      fn = engine.define,
-      args = { name, ctrltab }
+   local rule = {
+      fn = _do_define,
    }
+   rule.args = { rule, name, ctrltab }
+   return rule
 end
 
 builtin.def = builtin.define
 
 --[ Inclusion of rulesets ]-------------------------------------------
 
-local function _do_include(exec_context, ruleset, conds)
+local function _do_include(exec_context, rule, ruleset, conds)
    local pass, msg = run_conditions(exec_context, conds)
    if pass == nil then
-      -- Pass errors
+      -- Propagate errors
+      msg = err.offset(msg, 2)
+      msg = err.augment(msg, rule.source, rule.linenr)
       return nil, msg
    elseif pass == false then
       -- Conditions failed, return true to continue execution
@@ -309,6 +345,10 @@ local function _do_include(exec_context, ruleset, conds)
    local result, msg = engine.internal_run(ruleset, exec_context)
    if result == "" then
       return true
+   elseif result == nil then
+      msg.words = {err.subwords(msg, 2)}
+      msg = err.augment(msg, rule.source, rule.linenr)
+      return nil, msg
    end
    return result, msg
 end
@@ -367,10 +407,11 @@ function builtin.include(comp_context, cmd, file, ...)
    end
    
    -- Okay, we parsed, so build the runtime
-   return {
+   local rule = {
       fn = _do_include,
-      args = { ruleset, conds }
    }
+   rule.args = { rule, ruleset, conds }
+   return rule
 end
 
 return {

@@ -289,6 +289,23 @@ function suite.subsubdefine_err_reported()
    assert(line4 == "                                         ^^^^^  ", "The fourth line highlights relevant words")
 end
 
+function suite.subdefine_chained_err_reported()
+   local ruleset, msg = lace.compiler.compile(comp_context, "chaindefine-error")
+   assert(type(ruleset) == "table", "Ruleset did not compile")
+   local ectx = {error = true}
+   local result, msg = lace.engine.run(ruleset, ectx)
+   assert(result == false, "Did not error out")
+   local lines = {}
+   msg:gsub("([^\n]*)\n?", function(c) table.insert(lines, c) end)
+   assert(lines[1] == "woah", "The first line must mention the error")
+   assert(lines[2] == "real-chaindefine-error :: 2", "The second line is where the error happened")
+   assert(lines[3] == 'allow "FAIL" [anyof [equal jeff banana] bogus]', "The third line is the original line")
+   assert(lines[4] == "                                        ^^^^^ ", "The fourth line highlights relevant words")
+   assert(lines[5] == "real-chaindefine-error :: 1", "The fifth line is where the definition that errored comes from")
+   assert(lines[6] == 'define bogus error', "The sixth line is the define")
+   assert(lines[7] == "             ^^^^^", "The seventh line highlights relevant words")
+end
+
 local count_ok = 0
 for _, testname in ipairs(testnames) do
 --   print("Run: " .. testname)
