@@ -1,0 +1,20 @@
+_The Gitano Community_ is dedicated to providing a harassment-free experience
+for everyone, regardless of gender, gender identity and expression, sexual
+orientation, disability, physical appearance, body size, age, race, or
+religion. We do not tolerate harassment of participants in any form.
+
+This code of conduct applies to all _The Gitano Community_ spaces, including
+our mailing lists such as `gitano-dev@gitano.org.uk`, our IRC channels such as
+`#gitano` on Freenode, and at any in-person event at which members of the
+community attend, both online and off. Anyone who violates this code of conduct
+may be sanctioned or expelled from these spaces at the discretion of the Gitano
+Community Managers.
+
+Some _The Gitano Community_ spaces may have additional rules in place, which
+will be made clearly available to participants. Participants are responsible
+for knowing and abiding by these rules.
+
+The full text of the code of conduct / contributor covenant / anti-harassment
+policy can be found at: <https://www.gitano.org.uk/covenant/>.  Should the text
+of that page differ from the content of this file then the newer content on the
+website takes precedence.
