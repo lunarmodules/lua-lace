@@ -253,6 +253,14 @@ function suite.subdefine_works()
    assert(result, msg)
 end
 
+function suite.inverted_subdefine_works()
+   local ruleset, msg = lace.compiler.compile(comp_context, "inverted-subdefine-works")
+   assert(type(ruleset) == "table", "Ruleset did not compile")
+   local ectx = {jeff = "geoff"}
+   local result, msg = lace.engine.run(ruleset, ectx)
+   assert(result, msg)
+end
+
 function suite.subdefine_err_reported()
    local ruleset, msg = lace.compiler.compile(comp_context, "subdefine-error")
    assert(type(ruleset) == "table", "Ruleset did not compile")

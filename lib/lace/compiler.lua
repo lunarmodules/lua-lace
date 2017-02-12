@@ -101,7 +101,7 @@ local function transfer_args(compcontext, content, rules)
             return bindname(exec_context, rule, name, defn)
          end
 
-	 args[#args+1] = definename
+	 args[#args+1] = content[i].acc .. definename
 	 rules[#rules+1] = definerule
       else
 	 args[#args+1] = content[i].str

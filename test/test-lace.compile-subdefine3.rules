@@ -1,0 +1,2 @@
+define is_susan equal susan
+deny "Booo" is_susan ![equal jeff]

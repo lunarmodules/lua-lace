@@ -1,0 +1,2 @@
+default allow
+deny "PASS" ![equal jeff geoff]

@@ -60,16 +60,14 @@ local function _lex_one_line(line, terminator)
 	    quoting = c
 	    force_empty = true
 	 elseif c == '[' and quoting == false then
-	    if acc == "" then
-	       -- Something worth lexing
-	       local ltab, rest, warns = lex_one_line(line, "]")
-	       -- For now, assume the accumulator is good enough
-	       cpos = cpos + #line - #rest
-	       r[#r+1] = { spos = spos, epos = cpos, sub = ltab }
-	       spos = cpos + 1
-	       line = rest
-	       acc = ""
-	    end
+	    -- Something worth lexing
+	    local ltab, rest, warns = lex_one_line(line, "]")
+	    -- For now, assume the accumulator is good enough
+	    cpos = cpos + #line - #rest
+	    r[#r+1] = { spos = spos, epos = cpos, sub = ltab, acc = acc }
+	    spos = cpos + 1
+	    line = rest
+	    acc = ""
 	 elseif c == "'" and quoting == c then
 	    -- End single quotes
 	    quoting = false
