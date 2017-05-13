@@ -219,32 +219,6 @@ function suite.doubledefine()
    assert(line4 == "       ^^^^                ", "The fourth line highlights relevant words")
 end
 
-function suite.unknowndefine()
-   local ruleset, msg = lace.compiler.compile(comp_context, "unknowndefine")
-   assert(type(ruleset) == "table", "Ruleset did not compile")
-   local ectx = {error = true}
-   local result, msg = lace.engine.run(ruleset, ectx)
-   assert(result == false, "Did not error out")
-   local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
-   assert(line1:find("definition: fish"), "The first line must mention the error")
-   assert(line2 == "real-unknowndefine :: 3", "The second line is where the error happened")
-   assert(line3 == "allow anyway fish", "The third line is the original line")
-   assert(line4 == "             ^^^^", "The fourth line highlights relevant words")
-end
-
-function suite.unknownanyof()
-   local ruleset, msg = lace.compiler.compile(comp_context, "unknownanyof")
-   assert(type(ruleset) == "table", "Ruleset did not compile")
-   local ectx = {error = true}
-   local result, msg = lace.engine.run(ruleset, ectx)
-   assert(result == false, "Did not error out")
-   local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
-   assert(line1:find("definition: pants"), "The first line must mention the error")
-   assert(line2 == "real-unknownanyof :: 5", "The second line is where the error happened")
-   assert(line3 == "allow anyway fish", "The third line is the original line")
-   assert(line4 == "             ^^^^", "The fourth line highlights relevant words")
-end
-
 function suite.subdefine_works()
    local ruleset, msg = lace.compiler.compile(comp_context, "subdefine-works")
    assert(type(ruleset) == "table", "Ruleset did not compile")
