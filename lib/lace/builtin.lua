@@ -138,6 +138,16 @@ local function _return(compcontext, result, reason, ...)
    local cond = {...}
    if #cond == 0 then
       unconditional_result = result
+   else
+      compcontext._lace.defined = (compcontext._lace.defined or {})
+      for i, dname in ipairs(cond) do
+	 if dname:sub(1,1) == "!" then
+	    dname = dname:sub(2)
+	 end
+	 if not compcontext._lace.defined[dname] then
+	    return err.error("Undefined name used in condition ("..dname..")", {i+2})
+	 end
+      end
    end
    last_result = result
 
