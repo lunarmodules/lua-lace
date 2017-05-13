@@ -409,6 +409,17 @@ function builtin.include(comp_context, cmd, file, ...)
       return err.error("No ruleset named for inclusion", {1})
    end
 
+   -- Check the conditions are defined
+   comp_context._lace.defined = (comp_context._lace.defined or {})
+   for i, dname in ipairs(conds) do
+      if dname:sub(1,1) == "!" then
+	 dname = dname:sub(2)
+      end
+      if not comp_context._lace.defined[dname] then
+	 return err.error("Undefined name used in include condition ("..dname..")", {i+1})
+      end
+   end
+
    local loader = compiler().internal_loader(comp_context)
    local real, content = loader(comp_context, file)
 
