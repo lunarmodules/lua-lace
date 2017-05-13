@@ -547,7 +547,7 @@ end
 
 
 function suite.compile_anyof_two_args()
-   local compctx = {_lace = {}}
+   local compctx = {_lace = {defined={foo=true,bar=true}}}
    local cmdtab, msg = builtin.commands.define(compctx, "define", "foo", "anyof", "foo", "bar")
    assert(type(cmdtab) == "table", "Successful compilations should return tables")
    assert(type(cmdtab.fn) == "function", "With functions")
@@ -566,7 +566,7 @@ function suite.compile_anyof_two_args()
 end
 
 function suite.compile_allof_two_args()
-   local compctx = {_lace = {}}
+   local compctx = {_lace = {defined={foo=true,bar=true}}}
    local cmdtab, msg = builtin.commands.define(compctx, "define", "foo", "allof", "foo", "bar")
    assert(type(cmdtab) == "table", "Successful compilations should return tables")
    assert(type(cmdtab.fn) == "function", "With functions")
@@ -609,7 +609,7 @@ function suite.run_anyof_two_args()
 end
 
 function suite.run_anyof_two_args()
-   local compctx = {_lace = {}}
+   local compctx = {_lace = {defined={foo=true,bar=true}}}
    local cmdtab, msg = builtin.commands.define(compctx, "define", "jeff", "allof", "foo", "bar")
    assert(type(cmdtab) == "table", "Successful compilations should return tables")
    local ectx = {
