@@ -1,0 +1,5 @@
+-- Error in define anyof, expect an error on line 3 word 4
+define something equal foo
+define fish anyof something else
+
+allow "anyway"

@@ -239,6 +239,30 @@ function suite.error_in_define_anyof2()
    assert(line4 == "            ^^^^^ ^^^^^^^^^", "The fourth line highlights relevant words")
 end
 
+function suite.error_in_define_anyof3()
+   local result, msg = compiler.compile(comp_context, "errorindefineanyof3")
+   assert(result == false, "Errors compiling should return false")
+   assert(type(msg) == "string", "Compilation errors should be strings")
+   assert(msg:find("\n"), "Compilation errors are multiline")
+   local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
+   assert(line1:find("something"), "The first line must mention the error")
+   assert(line2 == "real-errorindefineanyof3 :: 3", "The third line is where the error happened")
+   assert(line3 == "define fish anyof something else", "The third line is the original line")
+   assert(line4 == "                  ^^^^^^^^^     ", "The fourth line highlights relevant words")
+end
+
+function suite.error_in_define_anyof4()
+   local result, msg = compiler.compile(comp_context, "errorindefineanyof4")
+   assert(result == false, "Errors compiling should return false")
+   assert(type(msg) == "string", "Compilation errors should be strings")
+   assert(msg:find("\n"), "Compilation errors are multiline")
+   local line1, line2, line3, line4 = msg:match("^([^\n]*)\n([^\n]*)\n([^\n]*)\n([^\n]*)$")
+   assert(line1:find("else"), "The first line must mention the error")
+   assert(line2 == "real-errorindefineanyof4 :: 3", "The third line is where the error happened")
+   assert(line3 == "define fish anyof something else", "The third line is the original line")
+   assert(line4 == "                            ^^^^", "The fourth line highlights relevant words")
+end
+
 function suite.error_in_allow_or_deny()
    local result, msg = compiler.compile(comp_context, "errorinallow")
    assert(result == false, "Errors compiling should return false")
