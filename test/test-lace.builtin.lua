@@ -446,7 +446,7 @@ function suite.run_cond_include_present_erroring()
    local function _loader(cctx, name)
       return name, "allow because\n"
    end
-   local compctx = {_lace = {loader=_loader}}
+   local compctx = {_lace = {loader=_loader, defined={cheese=true}}}
    local cmdtab, msg = builtin.commands.include(compctx, "include", "fish", "cheese")
    assert(type(cmdtab) == "table", "Commands should be tables")
    assert(type(cmdtab.fn) == "function", "With a function")
@@ -470,7 +470,7 @@ function suite.run_cond_include_present_failing()
    local function _loader(cctx, name)
       return name, "allow because\n"
    end
-   local compctx = {_lace = {loader=_loader}}
+   local compctx = {_lace = {loader=_loader, defined={cheese=true}}}
    local cmdtab, msg = builtin.commands.include(compctx, "include", "fish", "cheese")
    assert(type(cmdtab) == "table", "Commands should be tables")
    assert(type(cmdtab.fn) == "function", "With a function")
@@ -493,7 +493,7 @@ function suite.run_cond_include_present_passing()
    local function _loader(cctx, name)
       return name, "allow because\n"
    end
-   local compctx = {_lace = {loader=_loader}}
+   local compctx = {_lace = {loader=_loader, defined={cheese=true}}}
    local cmdtab, msg = builtin.commands.include(compctx, "include", "fish", "cheese")
    assert(type(cmdtab) == "table", "Commands should be tables")
    assert(type(cmdtab.fn) == "function", "With a function")
