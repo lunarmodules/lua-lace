@@ -358,6 +358,15 @@ function suite.compile_include_statement_noname()
    assert(msg.msg:match("ruleset name"), "Expected error should mention a lack of name")
 end
 
+function suite.compile_include_statement_unknowncond()
+   local compctx = {_lace = {}}
+   local cmdtab, msg = builtin.commands.include(compctx, "include", "whatever", "badcond")
+   assert(cmdtab == false, "Internal errors should return false")
+   assert(type(msg) == "table", "Internal errors should return tables")
+   assert(type(msg.msg) == "string", "Internal errors should have string messages")
+   assert(msg.msg:match("badcond"), "Expected error should mention the bad condition")
+end
+
 function suite.compile_include_statement_noloader()
    local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.include(compctx, "include", "fish")
