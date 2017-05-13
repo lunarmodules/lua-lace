@@ -318,6 +318,10 @@ function builtin.define(compcontext, define, name, controltype, ...)
       return false, msg
    end
 
+   -- Note the define name for checking by other control types
+   compcontext._lace.defined = (compcontext._lace.defined or {})
+   compcontext._lace.defined[name] = true
+
    -- Successfully created a control table, return a rule for it
    local rule = {
       fn = _do_define,
