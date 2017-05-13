@@ -75,6 +75,16 @@ function suite.run_builtin_allow_deny_novariables()
    assert(msg == "because", "Expected reason should be 'because'")
 end
 
+function suite.run_builtin_allow_deny_baddefines()
+   local compctx = {_lace = {}}
+   local cmdtab, msg = builtin.commands.allow(compctx, "allow", "because", "boogaloo")
+   assert(cmdtab == false, "Internal errors should return false")
+   assert(type(msg) == "table", "Internal errors should return tables")
+   assert(type(msg.msg) == "string", "Internal errors should have string messages")
+   assert(msg.msg:match("boogaloo"), "Expected error should mention 'boogaloo'")
+   assert(msg.words[1] == 3, "Expected hilight to be word 3 (boogaloo)")
+end
+
 function suite.builtin_get_set_unconditional()
    builtin.get_set_last_unconditional_result("FOO")
    assert(builtin.get_set_last_unconditional_result() == "FOO",
