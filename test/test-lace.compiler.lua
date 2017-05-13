@@ -73,7 +73,7 @@ function suite.no_content_no_loader()
 end
 
 function suite.no_unconditional_action()
-   local result, msg = compiler.compile({_lace = {}}, "", "deny stuff cond")
+   local result, msg = compiler.compile({_lace = {defined={cond=true}}}, "", "deny stuff cond")
    assert(type(result) == "table", "Loading a ruleset should result in a table")
    assert(#result.rules == 2, "There should be two rules present")
    local rule = result.rules[1]
@@ -89,7 +89,7 @@ function suite.no_unconditional_action()
 end
 
 function suite.no_unconditional_action_default_deny()
-   local result, msg = compiler.compile({_lace = {}}, "", "default deny\ndeny stuff cond")
+   local result, msg = compiler.compile({_lace = {defined={cond=true}}}, "", "default deny\ndeny stuff cond")
    assert(type(result) == "table", "Loading a ruleset should result in a table")
    assert(#result.rules == 3, "There should be three rules present")
    local rule = result.rules[1]
