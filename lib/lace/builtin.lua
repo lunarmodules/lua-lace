@@ -237,10 +237,22 @@ local function _compile_any_all_of(compcontext, mtype, first, second, ...)
       return err.error("Expected at least two names, only got one", {1, 2})
    end
 
+   -- Now check that all the arguments we were given make sense...
+   local cond = {first, second, ...}
+   compcontext._lace.defined = (compcontext._lace.defined or {})
+   for i, dname in ipairs(cond) do
+      if dname:sub(1,1) == "!" then
+	 dname = dname:sub(2)
+      end
+      if not compcontext._lace.defined[dname] then
+	 return err.error("Undefined name used in "..mtype.." ("..dname..")", {i + 1})
+      end
+   end
+
    local rule =  {
       fn = _do_any_all_of,
    }
-   rule.args = { rule, { first, second, ...}, mtype == "anyof" }
+   rule.args = { rule, cond, mtype == "anyof" }
    return rule
 end
 
