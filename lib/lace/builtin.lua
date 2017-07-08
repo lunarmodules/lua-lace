@@ -440,7 +440,8 @@ function builtin.include(comp_context, cmd, file, ...)
    -- Okay, the file is present, let's parse it.
    local ruleset, msg = compiler().internal_compile(comp_context, real, content, true)
    if type(ruleset) ~= "table" then
-      return false, msg
+      -- Propagation of the error means rendering and taking ownership...
+      return err.error(err.render(msg) .. "\nwhile including " .. file, {2})
    end
    
    -- Okay, we parsed, so build the runtime

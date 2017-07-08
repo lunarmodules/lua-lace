@@ -427,6 +427,25 @@ function suite.okay_negated_subdefine()
    assert(result, msg)
 end
 
+function suite.deep_errors_report_well()
+   local result, msg = compiler.compile(comp_context, "deeperror1")
+   local expected_err = [[
+define's second parameter (broken) must be a control type such as anyof
+real-deeperror3 :: 3
+define something broken
+                 ^^^^^^
+while including deeperror3
+real-deeperror2 :: 3
+include deeperror3
+        ^^^^^^^^^^
+while including deeperror2
+real-deeperror1 :: 3
+include deeperror2
+        ^^^^^^^^^^]]
+   assert(not result, "Err, didn't want the compilation to succeed")
+   assert(msg == expected_err, "Error message did not match")
+end
+
 local count_ok = 0
 for _, testname in ipairs(testnames) do
 --   print("Run: " .. testname)
