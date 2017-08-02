@@ -1,0 +1,18 @@
+News for Lace
+=============
+
+This document lists important things to know about changes to Lace between
+one release and the next.  It is arranged in reverse-version-order, with the
+newest NEWS at the top.
+
+
+Changes since v1.3.1
+--------------------
+
+* Produce better error messages when includes are involved, essentially forming
+  a 'stack backtrace'
+* Verify that define names used in anyof/allof conditions all exist at ruleset
+  compilation time
+* Verify that define names used in allow/deny conditions all exist at ruleset
+  compilation time
+* Added a NEWS file
