@@ -30,7 +30,7 @@ local function _lex_one_line(line, terminator)
    while #line > 0 do
       c, line = line:match("^(.)(.*)$")
       cpos = cpos + 1
-      if escaping then 
+      if escaping then
 	 if quoting then
 	    if c == "n" then
 	       acc = acc .. "\n"
@@ -134,7 +134,7 @@ function M.string(ruleset, sourcename)
    local lines = {}
    local ret = { source = sourcename, lines = lines }
    local n = 1
-   local warn
+   local warn, rest_of_line
    if ruleset:match("[^\n]$") then
       ruleset = ruleset .. "\n"
    end

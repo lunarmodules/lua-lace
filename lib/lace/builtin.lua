@@ -118,7 +118,7 @@ end
 --
 -- Allowing and denying access is, after all, what access control lists are all
 -- about.  This function compiles in an `allow` or `deny` statement including
--- noting what kind of access statement it is and what 
+-- noting what kind of access statement it is and what
 --
 -- @tparam table compcontext The compilation context
 -- @tparam string result The result to be compiled (`allow` or `deny`).
@@ -300,7 +300,7 @@ end
 --
 -- Definitions are a core behaviour of Lace.  This builtin allows the ruleset
 -- to define additional conditions on which `allow`, `deny` and `include` can
--- operate.  
+-- operate.
 --
 -- @tparam table compcontext The compilation context.
 -- @tparam string define The word which triggered this compilation command.
@@ -329,7 +329,7 @@ function builtin.define(compcontext, define, name, controltype, ...)
 
    local controlfn = _controlfn(compcontext, controltype)
    if not controlfn then
-      emsg = "%s's second parameter (%s) must be a control type such as anyof"
+      local emsg = "%s's second parameter (%s) must be a control type such as anyof"
       return err.error(emsg:format(define, controltype), {3})
    end
 
@@ -357,16 +357,19 @@ builtin.def = builtin.define
 --[ Inclusion of rulesets ]-------------------------------------------
 
 local function _do_include(exec_context, rule, ruleset, conds)
-   local pass, msg = run_conditions(exec_context, conds)
-   if pass == nil then
-      -- Propagate errors
-      msg = err.offset(msg, 2)
-      msg = err.augment(msg, rule.source, rule.linenr)
-      return nil, msg
-   elseif pass == false then
-      -- Conditions failed, return true to continue execution
-      return true
+   do
+      local pass, msg = run_conditions(exec_context, conds)
+      if pass == nil then
+         -- Propagate errors
+         msg = err.offset(msg, 2)
+         msg = err.augment(msg, rule.source, rule.linenr)
+         return nil, msg
+      elseif pass == false then
+         -- Conditions failed, return true to continue execution
+         return true
+      end
    end
+
    -- Essentially we run the ruleset and return its values
    local result, msg = engine.internal_run(ruleset, exec_context)
    if result == "" then
@@ -404,7 +407,7 @@ function builtin.include(comp_context, cmd, file, ...)
    local safe_if_not_present = cmd:sub(-1) == "?"
 
    local conds = {...}
-   
+
    if type(file) ~= "string" then
       return err.error("No ruleset named for inclusion", {1})
    end
@@ -436,14 +439,14 @@ function builtin.include(comp_context, cmd, file, ...)
       err.offset(content, 1)
       return real, content
    end
-   
+
    -- Okay, the file is present, let's parse it.
    local ruleset, msg = compiler().internal_compile(comp_context, real, content, true)
    if type(ruleset) ~= "table" then
       -- Propagation of the error means rendering and taking ownership...
       return err.error(err.render(msg) .. "\nwhile including " .. file, {2})
    end
-   
+
    -- Okay, we parsed, so build the runtime
    local rule = {
       fn = _do_include,

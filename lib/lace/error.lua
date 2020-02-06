@@ -50,8 +50,7 @@ local function _offset(err, offs)
    end
    for k, w in ipairs(err.words) do
       if type(w) == "table" then
-         nr = w.nr
-         err.words[k] = {nr = nr + offs, sub=w.sub}
+         err.words[k] = {nr = w.nr + offs, sub=w.sub}
       else
          err.words[k] = w + offs
       end
@@ -103,9 +102,9 @@ local function _render(err)
    local ret = { err.msg }
 
    local wordset = {}
-   local function build_wordset(words, wordset, parent_source, parent_linenr)
-      wordset.source = words.source or source
-      wordset.linenr = words.linenr or linenr
+   local function build_wordset(words, wordset, parent_source, parent_linenr) --luacheck: ignore 431/wordset
+      wordset.source = words.source or parent_source
+      wordset.linenr = words.linenr or parent_linenr
       for _, word in ipairs(words) do
          if type(word) ~= "table" then
             wordset[word] = true
@@ -119,7 +118,7 @@ local function _render(err)
    build_wordset(err.words, wordset)
 
    local linelist = {}
-   local function build_linelist(wordset, parent_source, parent_linenr)
+   local function build_linelist(wordset, parent_source, parent_linenr) --luacheck: ignore 431/wordset
       if parent_source ~= wordset.source or parent_linenr ~= wordset.linenr then
          linelist[#linelist+1] = wordset
       end
@@ -135,7 +134,7 @@ local function _render(err)
    end
    build_linelist(wordset)
 
-   local function mark_my_words(line, wordset)
+   local function mark_my_words(line, wordset) --luacheck: ignore 431/wordset
       local hlstr, cpos = "", 1
       for w, info in ipairs(line) do
          -- Ensure that we're up to the start position of the word
@@ -170,7 +169,7 @@ local function _render(err)
       return hlstr, cpos
    end
 
-   for _, wordset in ipairs(linelist) do
+   for _, wordset in ipairs(linelist) do --luacheck: ignore 421/wordset
       ret[#ret+1] = wordset.source.source .. " :: " .. tostring(wordset.linenr)
       local srcline = wordset.source.lines[wordset.linenr] or {
          original = "???", content = { {spos = 1, epos = 3, str = "???"} }
