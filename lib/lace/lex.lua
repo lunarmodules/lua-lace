@@ -23,6 +23,7 @@ local function _lex_one_line(line, terminator)
    local r = {}
    local acc = ""
    local c
+   local warnings = {}
    local escaping = false
    local quoting = false
    local force_empty = false
@@ -62,6 +63,12 @@ local function _lex_one_line(line, terminator)
 	 elseif c == '[' and quoting == false then
 	    -- Something worth lexing
 	    local ltab, rest, warns = lex_one_line(line, "]")
+	    if warns then
+	        -- Add to our list of warnings
+	        for _, warning in ipairs(warns) do
+	            warnings[#warnings+1] = warning;
+	        end
+	    end
 	    -- For now, assume the accumulator is good enough
 	    cpos = cpos + #line - #rest
 	    r[#r+1] = { spos = spos, epos = cpos, sub = ltab, acc = acc }
@@ -100,7 +107,6 @@ local function _lex_one_line(line, terminator)
       r[#r+1] = { spos = spos, epos = cpos, str = acc }
    end
 
-   local warnings = {}
    if quoting then
       warnings[#warnings+1] = "Un-terminated quoted string"
    end
