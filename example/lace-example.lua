@@ -70,6 +70,9 @@ local lace = require 'lace'
 -- name of the loaded ruleset (used for further errors etc) and the
 -- content of the ruleset as a string.
 --
+
+--luacheck: ignore 212/comp_ctx
+
 local function lace_loader(comp_ctx, name)
    local fname = base_dir .. "/" .. name .. ".rules"
    local fh = io.open(fname, "r")

@@ -39,6 +39,7 @@ function suite.error_formation()
 end
 
 function suite.error_offset()
+   --luacheck: ignore 211/f
    local words = {3,5}
    local f, err = error.error("msg", words)
    local nerr = error.offset(err, 2)
@@ -48,6 +49,7 @@ function suite.error_offset()
 end
 
 function suite.error_augmentation()
+   --luacheck: ignore 211/f
    local f, err = error.error("msg")
    local src = {}
    local aug = error.augment(err, src, 10)
@@ -57,6 +59,7 @@ function suite.error_augmentation()
 end
 
 function suite.error_render()
+   --luacheck: ignore 211/f
    local f, err = error.error("msg", {1, 3})
    local src = { source = "SOURCE", lines = {
 	 {
@@ -83,6 +86,7 @@ function suite.error_render()
 end
 
 function suite.error_render_bad_line()
+   --luacheck: ignore 211/f
    local f, err = error.error("msg", {1, 3})
    local src = { source = "SOURCE", lines = { } }
    error.augment(err, src, 1)

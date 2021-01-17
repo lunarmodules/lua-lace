@@ -143,7 +143,7 @@ local comp_context = {
 	 nocompile = function()
 			return err.error("NOCOMPILE", {2})
 		     end,
-	 equal = function(ctx, eq, key, value)
+	 equal = function(ctx, eq, key, value) --luacheck: ignore 212/eq
 		    return {
 		       fn = function(ectx, ekey, evalue)
 			       return ectx[ekey] == evalue
