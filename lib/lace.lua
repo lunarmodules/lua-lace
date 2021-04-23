@@ -37,5 +37,5 @@ return {
    _VERSION = _VERSION,
    VERSION = VERSION,
    _ABI = _ABI,
-   ABI = ABI,
+   ABI = _ABI,
 }

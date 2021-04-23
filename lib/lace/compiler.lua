@@ -17,13 +17,13 @@ local lex = require "lace.lex"
 local builtin = require "lace.builtin"
 local err = require "lace.error"
 
-local unpack = unpack or table.unpack
+local unpack = unpack or table.unpack --luacheck: ignore 113/unpack
 
-local function _fake_loader(ctx, name)
+local function _fake_loader(ctx, name) --luacheck: ignore 212/ctx
    return err.error("Ruleset not found: " .. name, {1})
 end
 
-local function _fake_command(ctx)
+local function _fake_command(ctx) --luacheck: ignore 212/ctx
    return err.error("Command is disabled by context")
 end
 
@@ -91,7 +91,7 @@ local function transfer_args(compcontext, content, rules)
          function definerule.fn(exec_context, rule, name, defn)
             local fn = defn.fn
             function defn.fn(...)
-               local res, msg = fn(...)
+               local res, msg = fn(...) --luacheck: ignore 431/msg
                if res == nil then
                   msg = err.offset(msg, -2)
                   return nil, msg
@@ -123,13 +123,13 @@ local function compile_one_line(compcontext, line)
    if type(rules) ~= "table" then
       return rules, args
    end
-   
-   local linerule, err = cmdfn(compcontext, unpack(args))
+
+   local linerule, msg = cmdfn(compcontext, unpack(args))
    if type(linerule) ~= "table" then
-      return linerule, err
+      return linerule, msg
    end
    rules[#rules+1] = linerule
-   return rules, err
+   return rules, msg
 end
 
 --- Internal ruleset compilation.
@@ -172,7 +172,7 @@ local function internal_compile_ruleset(compcontext, sourcename, content, suppre
       content = lexed_content,
       rules = {},
    }
-   
+
    local prev_uncond_result = builtin.get_set_last_unconditional_result()
    local prev_result = builtin.get_set_last_result()
 
@@ -264,8 +264,8 @@ local function compile_ruleset(ctx, src, cnt)
       ctx._lace.linenr = 1
       ctx._lace.magic_define_nr = 1
    end
-   local ok, ret, msg = xpcall(function() 
-				  return internal_compile_ruleset(ctx, src, cnt) 
+   local ok, ret, msg = xpcall(function()
+				  return internal_compile_ruleset(ctx, src, cnt)
 			       end, debug.traceback)
    if not ok then
       return nil, ret

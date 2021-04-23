@@ -14,7 +14,7 @@ pcall(require, 'luacov')
 local builtin = require 'lace.builtin'
 local engine = require 'lace.engine'
 
-local unpack = unpack or table.unpack
+local unpack = unpack or table.unpack --luacheck: ignore 113/unpack
 
 local testnames = {}
 
@@ -168,7 +168,7 @@ function suite.compile_builtin_default_twice()
    local compctx = {_lace = {}}
    local cmdtab, msg = builtin.commands.default(compctx, "default", "allow", "")
    assert(type(cmdtab) == "table", "Successful compilation should return a table")
-   local cmdtab, msg = builtin.commands.default(compctx, "default", "allow", "")
+   local cmdtab, msg = builtin.commands.default(compctx, "default", "allow", "") --luacheck: ignore 411/cmdtab
    assert(cmdtab == false, "Internal errors should return false")
    assert(type(msg) == "table", "Internal errors should return tables")
    assert(type(msg.msg) == "string", "Internal errors should have string messages")

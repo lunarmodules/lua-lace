@@ -15,7 +15,7 @@
 
 local err = require 'lace.error'
 
-local unpack = unpack or table.unpack
+local unpack = unpack or table.unpack --luacheck: ignore 113/unpack
 
 local function _dlace(ctx)
    local ret = ctx._lace or {}
@@ -115,10 +115,11 @@ end
 --                 otherwise it is an additional message to go with the result.
 -- @function run
 local function run_ruleset(ruleset, exec_context)
-   local ok, ret, msg = xpcall(function() 
+   local ok, ret, msg = xpcall(function()
 				  return internal_run_ruleset(ruleset, exec_context)
 			       end, debug.traceback)
    if not ok then
+     --luacheck: ignore 421/msg
       local _, msg = err.error(ret, {1})
       return nil, err.render(err.augment(msg, ruleset.rules[1].source, ruleset.rules[1].linenr))
    end

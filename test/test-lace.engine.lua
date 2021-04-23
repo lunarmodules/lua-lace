@@ -39,7 +39,7 @@ function suite.check_cannot_redefine_something()
    local ctx = {}
    local result, msg = lace.engine.define(ctx, "this", "that")
    assert(result == true, "Couldn't define something")
-   local result, msg = lace.engine.define(ctx, "this", "that")
+   local result, msg = lace.engine.define(ctx, "this", "that") --luacheck: ignore 411/result
    assert(result == false, "Should not have been able to redefine this")
    assert(type(msg) == "table", "Internal errors should be tables")
    assert(type(msg.msg) == "string", "Internal errors should have message strings")
@@ -57,14 +57,14 @@ end
 
 function suite.check_can_test_known_functions()
    local ctx = {}
-   local function run_test(ctx, arg)
+   local function run_test(ctx, arg) --luacheck: ignore 431/ctx
       assert(arg == "FISH", "Argument not passed properly")
       ctx.ran = true
       return "fish", "blah"
    end
    local result, msg = lace.engine.define(ctx, "this", { fn = run_test, args = { "FISH" } })
    assert(result == true, "Could not make definition?")
-   local result, msg = lace.engine.test(ctx, "this")
+   local result, msg = lace.engine.test(ctx, "this") --luacheck: ignore 411/result
    assert(result == "fish", "Expected result was not returned")
    assert(msg == "blah", "Expected message was not returned")
    assert(ctx.ran, "Context was not passed properly")
@@ -125,7 +125,7 @@ local comp_context = {
       commands = {
       },
       controltype = {
-	 equal = function(ctx, eq, key, value)
+	 equal = function(ctx, eq, key, value) --luacheck: ignore 212/eq
 		    return {
 		       fn = function(ectx, ekey, evalue)
 			       return ectx[ekey] == evalue
@@ -133,7 +133,7 @@ local comp_context = {
 		       args = { key, value },
 		    }
 		 end,
-	 error = function(ctx, err)
+	 error = function(ctx, err) --luacheck: ignore 212/err
 		    return {
 		       fn = function(ectx)
 			       if ectx.error then
@@ -190,7 +190,7 @@ function suite.test_complex_ruleset()
    for _, s in ipairs{"one","two","three","four"} do
       local expect = (s == "one" or s == "two") and "allow" or "deny"
       local ectx = {state=s}
-      local result, msg = lace.engine.run(ruleset, ectx)
+      local result, msg = lace.engine.run(ruleset, ectx) --luacheck: ignore 421/msg
       assert(result == expect, "Expected " .. expect)
       assert(msg == s, "Reason expected " .. s)
    end
