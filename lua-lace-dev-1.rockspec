@@ -1,7 +1,7 @@
 package = "lua-lace"
 version = "dev-1"
 source = {
-   url = "https://github.com/lunarmodules/lua-lace.git"
+   url = "git+https://github.com/lunarmodules/lua-lace.git"
 }
 description = {
    summary = "Lace is a simple access control engine modelled on Squid's acl syntax.",
