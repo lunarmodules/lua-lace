@@ -17,7 +17,7 @@ local lex = require "lace.lex"
 local builtin = require "lace.builtin"
 local err = require "lace.error"
 
-local unpack = unpack or table.unpack --luacheck: ignore 113/unpack
+local unpack = table.unpack or unpack --luacheck: ignore 113/unpack
 
 local function _fake_loader(ctx, name) --luacheck: ignore 212/ctx
    return err.error("Ruleset not found: " .. name, {1})
