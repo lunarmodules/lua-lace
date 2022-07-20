@@ -24,7 +24,7 @@
 -- @tparam {number,...}|nil words A list of the words causing this error.
 -- @tparam boolean rnil Whether to return nil (indicating a programming error).
 -- @treturn boolean|nil,table The compilation result (false or nil) and a
---                            compilation error table
+-- compilation error table
 -- @function error
 local function _error(str, words, rnil)
    local ret = false

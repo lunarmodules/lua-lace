@@ -65,23 +65,23 @@ local function transfer_args(compcontext, content, rules)
    local args = {}
    for i = 1, #content do
       if content[i].sub then
-	 local sub = content[i].sub
-	 local defnr = compcontext._lace.magic_define_nr
-	 local definename = "__autodef"..tostring(defnr)
-	 compcontext._lace.magic_define_nr = defnr + 1
-	 local definefn = _command(compcontext, "define")
-	 local subargs
-	 rules, subargs = transfer_args(compcontext, sub, rules)
-	 if type(rules) ~= "table" then
-	    return rules, subargs
-	 end
-	 local definerule, msg = definefn(compcontext, "define", definename,
-					  unpack(subargs))
-	 if type(definerule) ~= "table" then
-	    -- for now, we lock the error to the whole sublex
-	    msg.words = {i}
-	    return definerule, msg
-	 end
+         local sub = content[i].sub
+         local defnr = compcontext._lace.magic_define_nr
+         local definename = "__autodef"..tostring(defnr)
+         compcontext._lace.magic_define_nr = defnr + 1
+         local definefn = _command(compcontext, "define")
+         local subargs
+         rules, subargs = transfer_args(compcontext, sub, rules)
+         if type(rules) ~= "table" then
+            return rules, subargs
+         end
+         local definerule, msg = definefn(compcontext, "define", definename,
+                                          unpack(subargs))
+         if type(definerule) ~= "table" then
+            -- for now, we lock the error to the whole sublex
+            msg.words = {i}
+            return definerule, msg
+         end
 
          -- Fix up error location offset
          -- The error words are offset by 2 because the "define" token and name,
@@ -101,10 +101,10 @@ local function transfer_args(compcontext, content, rules)
             return bindname(exec_context, rule, name, defn)
          end
 
-	 args[#args+1] = content[i].acc .. definename
-	 rules[#rules+1] = definerule
+         args[#args+1] = content[i].acc .. definename
+         rules[#rules+1] = definerule
       else
-	 args[#args+1] = content[i].str
+         args[#args+1] = content[i].str
       end
    end
    return rules, args
@@ -153,13 +153,13 @@ local function internal_compile_ruleset(compcontext, sourcename, content, suppre
       -- No content supplied, try and load it.
       sourcename, content = _loader(compcontext)(compcontext, sourcename)
       if type(sourcename) ~= "string" then
-	 if not suppress_default then
-	    -- We're not suppressing default which implies we're
-	    -- the first out of the gate, so we need
-	    -- to offset to account for the implicit include
-	    err.offset(content, 1)
-	 end
-	 return false, err.augment(content, compcontext._lace.source, compcontext._lace.linenr)
+         if not suppress_default then
+            -- We're not suppressing default which implies we're
+            -- the first out of the gate, so we need
+            -- to offset to account for the implicit include
+            err.offset(content, 1)
+         end
+         return false, err.augment(content, compcontext._lace.source, compcontext._lace.linenr)
       end
    end
 
@@ -185,18 +185,18 @@ local function internal_compile_ruleset(compcontext, sourcename, content, suppre
    for i = 1, #lexed_content.lines do
       local line = lexed_content.lines[i]
       if line.type == "rule" then
-	 -- worth trying to parse a rule
-	 _setposition(compcontext, ruleset, i)
-	 local rules, msg = compile_one_line(compcontext, line)
-	 if type(rules) ~= "table" then
-	    return rules, err.augment(msg, ruleset.content, i)
-	 end
-	 for j = 1, #rules do
-	    local rule = rules[j]
-	    rule.linenr = i
-	    rule.source = ruleset.content
-	    ruleset.rules[#ruleset.rules+1] = rule
-	 end
+         -- worth trying to parse a rule
+         _setposition(compcontext, ruleset, i)
+         local rules, msg = compile_one_line(compcontext, line)
+         if type(rules) ~= "table" then
+            return rules, err.augment(msg, ruleset.content, i)
+         end
+         for j = 1, #rules do
+            local rule = rules[j]
+            rule.linenr = i
+            rule.source = ruleset.content
+            ruleset.rules[#ruleset.rules+1] = rule
+         end
       end
    end
 
@@ -218,9 +218,9 @@ local function internal_compile_ruleset(compcontext, sourcename, content, suppre
 
    if not suppress_default and not uncond then
       if not compcontext._lace.default then
-	 -- No default, fake one up
-	 builtin.commands.default(compcontext, "default",
-				  result == "allow" and "deny" or "allow")
+         -- No default, fake one up
+         builtin.commands.default(compcontext, "default",
+                                  result == "allow" and "deny" or "allow")
       end
       -- Now, inject the default command at the end of the ruleset.
       ruleset.rules[#ruleset.rules+1] = compcontext._lace.default
@@ -239,8 +239,8 @@ end
 --
 -- @tparam table ctx Compilation context
 -- @tparam string src Source name
--- @tparam ?string cnt Source contents (nil to cause an implicit
---                                      include of _src_)
+-- @tparam ?string cnt Source contents (nil to cause an implicit include of
+-- _src_)
 -- @treturn table Compiled Lace ruleset
 -- @function compile
 local function compile_ruleset(ctx, src, cnt)
@@ -248,25 +248,25 @@ local function compile_ruleset(ctx, src, cnt)
    -- source so that we can be sure the expect early errors to stand a chance
    if ctx and src and not cnt then
       if type(ctx._lace) ~= "table" then
-	 return nil, "Compilation context must contain a _lace table"
+         return nil, "Compilation context must contain a _lace table"
       end
       ctx._lace.source = {
-	 source = "Implicit inclusion of " .. src,
-	 lines = { {
-	       original = "include " .. src,
-	       content = {
-		  { spos = 1, epos = 7, content = "include" },
-		  { spos = 9, epos = 8 + #src, content = src }
-	       }
-	    }
-	 }
+         source = "Implicit inclusion of " .. src,
+         lines = { {
+               original = "include " .. src,
+               content = {
+                  { spos = 1, epos = 7, content = "include" },
+                  { spos = 9, epos = 8 + #src, content = src }
+               }
+            }
+         }
       }
       ctx._lace.linenr = 1
       ctx._lace.magic_define_nr = 1
    end
    local ok, ret, msg = xpcall(function()
-				  return internal_compile_ruleset(ctx, src, cnt)
-			       end, debug.traceback)
+                                  return internal_compile_ruleset(ctx, src, cnt)
+                               end, debug.traceback)
    if not ok then
       return nil, ret
    end
