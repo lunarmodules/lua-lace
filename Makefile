@@ -20,7 +20,7 @@ LUA := LUA_PATH="$(shell pwd)/lib/?.lua;$(shell pwd)/extras/luacov/src/?.lua;;" 
 
 clean:
 	$(RM) luacov.report.out luacov.stats.out
-	$(RM) -r html
+	$(RM) -r docs
 
 distclean: clean
 	find . -name "*~" -delete
