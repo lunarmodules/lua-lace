@@ -30,24 +30,24 @@ local function run_conditions(exec_context, cond, anyof)
       local name = cond[i]
       local invert = false
       if name:sub(1,1) == "!" then
-	 invert = true
-	 name = name:sub(2)
+         invert = true
+         name = name:sub(2)
       end
       local res, msg = engine.test(exec_context, name)
       if res == nil then
-	 msg.words = {err.subwords(msg, i)}
-	 return nil, msg
+         msg.words = {err.subwords(msg, i)}
+         return nil, msg
       end
       if invert then
-	 res = not res
+         res = not res
       end
       if not res then
-	 -- condition failed
-	 if not anyof then
-	    return false
-	 end
+         -- condition failed
+         if not anyof then
+            return false
+         end
       else
-	 anymet = true
+         anymet = true
       end
    end
    -- conditions passed
@@ -70,7 +70,7 @@ local unconditional_result, last_result
 -- that it can synthesise default access statements if needed.
 --
 -- @tparam string|nil newv The new value for the last access result.
---                         It should be one of `allow`, `deny` or a _nil_.
+-- It should be one of `allow`, `deny` or a _nil_.
 -- @treturn string|nil The old (current) value for the last access result.
 -- @function get_set_last_unconditional_result
 local function get_set_last_unconditional_result(newv)
@@ -88,7 +88,7 @@ end
 -- that it can synthesise default access statements if needed.
 --
 -- @tparam string|nil newv The new value for the last access result.
---                         It should be one of `allow`, `deny` or a _nil_.
+-- It should be one of `allow`, `deny` or a _nil_.
 -- @treturn string|nil The old (current) value for the last access result.
 -- @function get_set_last_result
 local function get_set_last_result(newv)
@@ -141,12 +141,12 @@ local function _return(compcontext, result, reason, ...)
    else
       compcontext._lace.defined = (compcontext._lace.defined or {})
       for i, dname in ipairs(cond) do
-	 if dname:sub(1,1) == "!" then
-	    dname = dname:sub(2)
-	 end
-	 if not compcontext._lace.defined[dname] then
-	    return err.error("Undefined name used in condition ("..dname..")", {i+2})
-	 end
+         if dname:sub(1,1) == "!" then
+            dname = dname:sub(2)
+         end
+         if not compcontext._lace.defined[dname] then
+            return err.error("Undefined name used in condition ("..dname..")", {i+2})
+         end
       end
    end
    last_result = result
@@ -242,10 +242,10 @@ local function _compile_any_all_of(compcontext, mtype, first, second, ...)
    compcontext._lace.defined = (compcontext._lace.defined or {})
    for i, dname in ipairs(cond) do
       if dname:sub(1,1) == "!" then
-	 dname = dname:sub(2)
+         dname = dname:sub(2)
       end
       if not compcontext._lace.defined[dname] then
-	 return err.error("Undefined name used in "..mtype.." ("..dname..")", {i + 1})
+         return err.error("Undefined name used in "..mtype.." ("..dname..")", {i + 1})
       end
    end
 
@@ -304,13 +304,12 @@ end
 --
 -- @tparam table compcontext The compilation context.
 -- @tparam string define The word which triggered this compilation command.
---                       (`define`)
+-- (`define`)
 -- @tparam string name The name being defined.
 -- @tparam string controltype The control type to be used. (Such as `anyof`,
---                            `allof` or any of the match types defined by
---                            the caller of the compiler).
+-- `allof` or any of the match types defined by the caller of the compiler).
 -- @tparam[opt] string ... The content of the definition (consumed by the
---                         match type compiler).
+-- match type compiler).
 -- @treturn table The compiled definition command.
 -- @function commands.define
 -- @alias commands.def
@@ -396,11 +395,11 @@ end
 --
 -- @tparam table comp_context The compilation context
 -- @tparam string cmd The command which triggered this include command.
---                    (`include` or `include?`)
+-- (`include` or `include?`)
 -- @tparam string file The file (source name) to include.
 -- @tparam[opt] string ... Zero or more conditions under which the included
---                         content will be run by the engine.  If there are no
---                         conditions then the include is unconditional.
+-- content will be run by the engine.  If there are no conditions then the
+-- include is unconditional.
 -- @treturn table The compiled inclusion command.
 -- @function commands.include
 function builtin.include(comp_context, cmd, file, ...)
@@ -416,10 +415,10 @@ function builtin.include(comp_context, cmd, file, ...)
    comp_context._lace.defined = (comp_context._lace.defined or {})
    for i, dname in ipairs(conds) do
       if dname:sub(1,1) == "!" then
-	 dname = dname:sub(2)
+         dname = dname:sub(2)
       end
       if not comp_context._lace.defined[dname] then
-	 return err.error("Undefined name used in include condition ("..dname..")", {i+1})
+         return err.error("Undefined name used in include condition ("..dname..")", {i+1})
       end
    end
 
@@ -429,11 +428,11 @@ function builtin.include(comp_context, cmd, file, ...)
    if not real then
       -- Could not find the file
       if safe_if_not_present then
-	 -- Include file was not present, just return an empty command
-	 return {
-	    fn = function() return true end,
-	    args = {}
-	 }
+         -- Include file was not present, just return an empty command
+         return {
+            fn = function() return true end,
+            args = {}
+         }
       end
       -- Otherwise, propagate the error
       err.offset(content, 1)

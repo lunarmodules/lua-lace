@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Lace - Lua Access Control Engine</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>Lua Access Control Engine</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/lace.html">lace</a></li>
+  <li><a href="../modules/lace.builtin.html">lace.builtin</a></li>
+  <li><a href="../modules/lace.compiler.html">lace.compiler</a></li>
+  <li><a href="../modules/lace.engine.html">lace.engine</a></li>
+  <li><strong>lace.error</strong></li>
+  <li><a href="../modules/lace.lex.html">lace.lex</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/README.html">README</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>lace.error</code></h1>
+<p>Error routines for Lace ruleset compilers and runtime engines.</p>
+<p> Errors are a critical part of anything user-facing.  Lace works very
+ hard to ensure that it can report errors effectively so that the author
+ of the ruleset (the user of the application which is using Lace) can work
+ out what went wrong and how to fix it.</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#error">error (str, words, rnil)</a></td>
+	<td class="summary">Report an error.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#offset">offset (err, offs)</a></td>
+	<td class="summary">Offset an error's recorded wordset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#augment">augment (err, source, number)</a></td>
+	<td class="summary">Augment an error with source information</p>
+
+<p> In order for errors to be useful they need to be augmented with the source
+ document in which they occurred and the line number on which they occurred.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#render">render (err)</a></td>
+	<td class="summary">Render an error down to a string.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "error"></a>
+    <strong>error (str, words, rnil)</strong>
+    </dt>
+    <dd>
+    Report an error. </p>
+
+<p> Report an error, including indicating which words caused the problem.
+ The words are 1-indexed from the start of whatever routine is trying
+ to consume words.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">str</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The error message.
+        </li>
+        <li><span class="parameter">words</span>
+            <span class="types"><span class="type">{number,...}</span> or <span class="type">nil</span></span>
+         A list of the words causing this error.
+        </li>
+        <li><span class="parameter">rnil</span>
+            <span class="types"><span class="type">boolean</span></span>
+         Whether to return nil (indicating a programming error).
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span> or <span class="type">nil,table</span></span>
+        The compilation result (false or nil) and a
+ compilation error table
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "offset"></a>
+    <strong>offset (err, offs)</strong>
+    </dt>
+    <dd>
+    Offset an error's recorded wordset. </p>
+
+<p> Since errors carry word indices, if the layers of the compiler or runtime
+ alter the offsets, this routine can be used to offset the word indices
+ in an error message.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">err</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The error table
+        </li>
+        <li><span class="parameter">offs</span>
+            <span class="types"><span class="type">number</span></span>
+         The offset by which to adjust the error words.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+        The error table (mutated by the offset).
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "augment"></a>
+    <strong>augment (err, source, number)</strong>
+    </dt>
+    <dd>
+    Augment an error with source information</p>
+
+<p> In order for errors to be useful they need to be augmented with the source
+ document in which they occurred and the line number on which they occurred.
+ This function allows the compiler (or runtime) to do just that.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">err</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The error table to augment
+        </li>
+        <li><span class="parameter">source</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The lexically analysed source document.
+        </li>
+        <li><span class="parameter">number</span>
+            <span class="types"><span class="type">linenr</span></span>
+         The line number on which the error occurred.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+        The error table (mutated with the source information).
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "render"></a>
+    <strong>render (err)</strong>
+    </dt>
+    <dd>
+    Render an error down to a string. </p>
+
+<p> Error tables carry a message, an optional set of words which caused the
+ error (if known) and a lexically analysed source and line number.</p>
+
+<p> This function renders that information down to a multiline string which can
+ usefully be presented to the user of an application using Lace for access
+ control.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">err</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The error table.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        A multiline string rendering of the error.
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2022-07-20 13:26:50 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

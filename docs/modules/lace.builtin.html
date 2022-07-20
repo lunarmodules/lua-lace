@@ -1,0 +1,385 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Lace - Lua Access Control Engine</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>Lua Access Control Engine</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/lace.html">lace</a></li>
+  <li><strong>lace.builtin</strong></li>
+  <li><a href="../modules/lace.compiler.html">lace.compiler</a></li>
+  <li><a href="../modules/lace.engine.html">lace.engine</a></li>
+  <li><a href="../modules/lace.error.html">lace.error</a></li>
+  <li><a href="../modules/lace.lex.html">lace.lex</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/README.html">README</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>lace.builtin</code></h1>
+<p>Lace builtin commands and match types.</p>
+<p> The builtin match types and commands provided by Lace.  These commands and
+ match types are supported automatically by all lace compiles.  The builtin
+ command <a href="../modules/lace.builtin.html#commands.default">default</a> and the builtin commands <a href="../modules/lace.builtin.html#commands.allow">allow</a> and <code>deny</code> collude with
+ the compiler to ensure that all compiled rulesets will always either
+ explicitly allow or deny access.</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#get_set_last_unconditional_result">get_set_last_unconditional_result (newv)</a></td>
+	<td class="summary">Internal function to get/set the last result for unconditional access.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#get_set_last_result">get_set_last_result (newv)</a></td>
+	<td class="summary">Internal function to get/set the last result for access.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#commands.allow">commands.allow (compcontext, result, reason[, ...])</a></td>
+	<td class="summary">Compile an <a href="../modules/lace.builtin.html#commands.allow">allow</a> or <code>deny</code>.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#commands.default">commands.default (compcontext, def, result, reason[, unwanted])</a></td>
+	<td class="summary">Compile a <a href="../modules/lace.builtin.html#commands.default">default</a> command.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#commands.define">commands.define (compcontext, define, name, controltype[, ...])</a></td>
+	<td class="summary">Compile a definition command</p>
+
+<p> Definitions are a core behaviour of Lace.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#commands.include">commands.include (comp_context, cmd, file[, ...])</a></td>
+	<td class="summary">Compile an <a href="../modules/lace.builtin.html#commands.include">include</a> command.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "get_set_last_unconditional_result"></a>
+    <strong>get_set_last_unconditional_result (newv)</strong>
+    </dt>
+    <dd>
+    Internal function to get/set the last result for unconditional access. </p>
+
+<p> The last result (unconditional only) is stored so that defaults can be
+ processed in the absence of a <a href="../modules/lace.builtin.html#commands.default">default</a> statement.</p>
+
+<p> This function exists to collude with <a href="../modules/lace.compiler.html#internal_compile">lace.compiler.internal_compile</a> so
+ that it can synthesise default access statements if needed.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">newv</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+         The new value for the last access result.
+ It should be one of <a href="../modules/lace.builtin.html#commands.allow">allow</a>, <code>deny</code> or a <em>nil</em>.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        The old (current) value for the last access result.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "get_set_last_result"></a>
+    <strong>get_set_last_result (newv)</strong>
+    </dt>
+    <dd>
+    Internal function to get/set the last result for access. </p>
+
+<p> The last result (conditional perhaps) is stored so that defaults can be
+ processed in the absence of a <a href="../modules/lace.builtin.html#commands.default">default</a> statement.</p>
+
+<p> This function exists to collude with <a href="../modules/lace.compiler.html#internal_compile">lace.compiler.internal_compile</a> so
+ that it can synthesise default access statements if needed.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">newv</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+         The new value for the last access result.
+ It should be one of <a href="../modules/lace.builtin.html#commands.allow">allow</a>, <code>deny</code> or a <em>nil</em>.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        The old (current) value for the last access result.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "commands.allow"></a>
+    <strong>commands.allow (compcontext, result, reason[, ...])</strong>
+    </dt>
+    <dd>
+    Compile an <a href="../modules/lace.builtin.html#commands.allow">allow</a> or <code>deny</code>. </p>
+
+<p> (_Note: this is also <code>commands.deny</code>_)</p>
+
+<p> Allowing and denying access is, after all, what access control lists are all
+ about.  This function compiles in an <a href="../modules/lace.builtin.html#commands.allow">allow</a> or <code>deny</code> statement including
+ noting what kind of access statement it is and what
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">compcontext</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The compilation context
+        </li>
+        <li><span class="parameter">result</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The result to be compiled (<a href="../modules/lace.builtin.html#commands.allow">allow</a> or <code>deny</code>).
+        </li>
+        <li><span class="parameter">reason</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The reason to be returned to the user for this.
+        </li>
+        <li><span class="parameter">...</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The conditions placed on this <a href="../modules/lace.builtin.html#commands.allow">allow</a> or <code>deny</code>.
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+        The compiled <a href="../modules/lace.builtin.html#commands.allow">allow</a>/<code>deny</code>.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "commands.default"></a>
+    <strong>commands.default (compcontext, def, result, reason[, unwanted])</strong>
+    </dt>
+    <dd>
+    Compile a <a href="../modules/lace.builtin.html#commands.default">default</a> command. </p>
+
+<p> All rulesets must, ultimately, allow or deny access.  The <a href="../modules/lace.builtin.html#commands.default">default</a> command
+ allows rulesets to define whether they are permissive (defaulting to
+ <a href="../modules/lace.builtin.html#commands.allow">allow</a>) or proscriptive (defaulting to <code>deny</code>).</p>
+
+<p> In addition, setting default causes a record to be made, preventing
+ additional attempts to set a default access mode.  This ensures that once
+ the default has been selected, additional ruleset included (perhaps from
+ untrusted sources) cannot change the default behaviour.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">compcontext</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The compilation context
+        </li>
+        <li><span class="parameter">def</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The command which triggered this compilation. (<a href="../modules/lace.builtin.html#commands.default">default</a>)
+        </li>
+        <li><span class="parameter">result</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The default result (<a href="../modules/lace.builtin.html#commands.allow">allow</a> or <code>deny</code>)
+        </li>
+        <li><span class="parameter">reason</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The reason to be given.
+        </li>
+        <li><span class="parameter">unwanted</span>
+            <span class="types"><span class="type">*</span></span>
+         If <em>unwanted</em> is anything but nil, an error occurs.
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+        A null command
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "commands.define"></a>
+    <strong>commands.define (compcontext, define, name, controltype[, ...])</strong>
+    </dt>
+    <dd>
+    Compile a definition command</p>
+
+<p> Definitions are a core behaviour of Lace.   This builtin allows the ruleset
+ to define additional conditions on which <a href="../modules/lace.builtin.html#commands.allow">allow</a>, <code>deny</code> and <a href="../modules/lace.builtin.html#commands.include">include</a> can
+ operate.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">compcontext</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The compilation context.
+        </li>
+        <li><span class="parameter">define</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The word which triggered this compilation command.
+ (<a href="../modules/lace.builtin.html#commands.define">define</a>)
+        </li>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The name being defined.
+        </li>
+        <li><span class="parameter">controltype</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The control type to be used. (Such as <code>anyof</code>,
+ <code>allof</code> or any of the match types defined by the caller of the compiler).
+        </li>
+        <li><span class="parameter">...</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The content of the definition (consumed by the
+ match type compiler).
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+        The compiled definition command.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "commands.include"></a>
+    <strong>commands.include (comp_context, cmd, file[, ...])</strong>
+    </dt>
+    <dd>
+    Compile an <a href="../modules/lace.builtin.html#commands.include">include</a> command. </p>
+
+<p> Compile a lace <a href="../modules/lace.builtin.html#commands.include">include</a> command.  This uses the exported internal loader
+ function <a href="../modules/lace.compiler.html#internal_loader">lace.compiler.internal_loader</a> to find a loader and if it finds
+ one, it uses the internal compilation function
+ <a href="../modules/lace.compiler.html#internal_compile">lace.compiler.internal_compile</a> to compile the loaded source before
+ constructing a runtime "inclusion" which deals with the conditions before
+ running the sub-ruleset if appropriate.</p>
+
+<p> Regardless of the conditions placed on the include statement, includes are
+ always processed during compilation.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">comp_context</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The compilation context
+        </li>
+        <li><span class="parameter">cmd</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The command which triggered this include command.
+ (<a href="../modules/lace.builtin.html#commands.include">include</a> or <code>include?</code>)
+        </li>
+        <li><span class="parameter">file</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The file (source name) to include.
+        </li>
+        <li><span class="parameter">...</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         Zero or more conditions under which the included
+ content will be run by the engine.  If there are no conditions then the
+ include is unconditional.
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+        The compiled inclusion command.
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2022-07-20 13:26:50 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Lace - Lua Access Control Engine</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>Lua Access Control Engine</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/lace.html">lace</a></li>
+  <li><a href="../modules/lace.builtin.html">lace.builtin</a></li>
+  <li><a href="../modules/lace.compiler.html">lace.compiler</a></li>
+  <li><strong>lace.engine</strong></li>
+  <li><a href="../modules/lace.error.html">lace.error</a></li>
+  <li><a href="../modules/lace.lex.html">lace.lex</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/README.html">README</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>lace.engine</code></h1>
+<p>The runtime engine for the Lua Access Control Engine</p>
+
+<p> Once a ruleset has been compiled, it can be run for multiple inputs without
+ needing to be recompiled.</p>
+<p>  This is handy for controlling access to a
+ long-lived daemon such as an HTTP proxy.</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#define">define (exec_context, name, defn)</a></td>
+	<td class="summary">Set a definition.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#test">test (exec_context, name)</a></td>
+	<td class="summary">Test a definition.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#internal_run">internal_run (ruleset, exec_context)</a></td>
+	<td class="summary">Internal routine for running sub-rulesets</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#run">run (ruleset, exec_context)</a></td>
+	<td class="summary">Run a ruleset.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "define"></a>
+    <strong>define (exec_context, name, defn)</strong>
+    </dt>
+    <dd>
+    Set a definition.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">exec_context</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The execution context for the runtime.
+        </li>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The name of the define to set.
+        </li>
+        <li><span class="parameter">defn</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The definition function to use.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">boolean</span></span>
+        Returns true if the definition was set successfully.</li>
+        <li>
+           <span class="types"><span class="type">nil</span> or <a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+        If the definition was not set successfully then this is
+ the error table ready to have context added to it.</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "test"></a>
+    <strong>test (exec_context, name)</strong>
+    </dt>
+    <dd>
+    Test a definition.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">exec_context</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The execution context for the runtime.
+        </li>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The name of the define to test.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">boolean</span> or <span class="type">nil</span></span>
+         If the named definition does not exist, this is nil.
+ Otherwise it is true iff. the definition's function
+ results in true.</li>
+        <li>
+           <span class="types"><span class="type">nil</span> or <a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         If the named definition does not exist, this is the error
+ table ready for filling out with more context.
+ Otherwise it is nil.</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "internal_run"></a>
+    <strong>internal_run (ruleset, exec_context)</strong>
+    </dt>
+    <dd>
+    Internal routine for running sub-rulesets
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">ruleset</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The compiled ruleset to run.
+        </li>
+        <li><span class="parameter">exec_context</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The execution context for the runtime.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">nil</span>, <span class="type">boolean</span> or <a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The first return value is <code>nil</code> in the case
+ of a runtime error, <code>false</code> if a Lace error
+ was encountered during runtime, otherwise it it
+ a result string (typically <code>allow</code> or <code>deny</code>).
+ In addition, internally, an empty result string
+ will be returned if no result was set by the
+ sub-ruleset.</li>
+        <li>
+           <span class="types"><span class="type">nil</span> or <a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         If an error was encountered, this is the error message,
+ otherwise it is an additional message to go with the
+ result if there was one, or <code>nil</code> in the case of no
+ result value being set by the ruleset.</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "run"></a>
+    <strong>run (ruleset, exec_context)</strong>
+    </dt>
+    <dd>
+    Run a ruleset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">ruleset</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The compiled ruleset to run.
+        </li>
+        <li><span class="parameter">exec_context</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The execution context for the runtime.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">nil</span>, <span class="type">boolean</span> or <a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The first return value is <code>nil</code> in the case
+ of a runtime error, <code>false</code> if a Lace error
+ was encountered during runtime, otherwise it it
+ a result string (typically <code>allow</code> or <code>deny</code>).</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        If an error was encountered, this is the error message,
+ otherwise it is an additional message to go with the result.</li>
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2022-07-20 13:26:50 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

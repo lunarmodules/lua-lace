@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Lace - Lua Access Control Engine</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>Lua Access Control Engine</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/lace.html">lace</a></li>
+  <li><a href="../modules/lace.builtin.html">lace.builtin</a></li>
+  <li><strong>lace.compiler</strong></li>
+  <li><a href="../modules/lace.engine.html">lace.engine</a></li>
+  <li><a href="../modules/lace.error.html">lace.error</a></li>
+  <li><a href="../modules/lace.lex.html">lace.lex</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/README.html">README</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>lace.compiler</code></h1>
+<p>The compiler for the Lua Access Control engine.</p>
+<p> Lace works hard to give you good error message information when encountering
+ problems with your rulesets.  The compiler gathers a lot of debug
+ information and stores it alongside the compiled ruleset.</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#internal_loader">internal_loader (ctx)</a></td>
+	<td class="summary">Internal loader abstraction.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#internal_compile">internal_compile (compcontext, sourcename, content, suppress_default)</a></td>
+	<td class="summary">Internal ruleset compilation.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#compile">compile (ctx, src, cnt)</a></td>
+	<td class="summary">Compile a lace ruleset.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "internal_loader"></a>
+    <strong>internal_loader (ctx)</strong>
+    </dt>
+    <dd>
+    Internal loader abstraction. </p>
+
+<p> Used by <code>lace.builtin.commands.include</code>, this function returns a loader
+ which can be used to acquire more content during compilation of a Lace
+ ruleset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">ctx</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The Lace compiliation context
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">function</span></span>
+        A loader function
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "internal_compile"></a>
+    <strong>internal_compile (compcontext, sourcename, content, suppress_default)</strong>
+    </dt>
+    <dd>
+    Internal ruleset compilation. </p>
+
+<p> Internal ruleset compilation function.  This function should not be used
+ except from compilation commands such as <code>lace.builtin.commands.include</code>.
+ This function is much less forgiving of issues than <a href="../modules/lace.compiler.html#compile">lace.compiler.compile</a>.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">compcontext</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         Compilation context
+        </li>
+        <li><span class="parameter">sourcename</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         Source name
+        </li>
+        <li><span class="parameter">content</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         Source content
+        </li>
+        <li><span class="parameter">suppress_default</span>
+            <span class="types"><span class="type">boolean</span></span>
+         Suppress the use of a default rule.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+        Compiled Lace ruleset
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "compile"></a>
+    <strong>compile (ctx, src, cnt)</strong>
+    </dt>
+    <dd>
+    Compile a lace ruleset. </p>
+
+<p> Compile a lace ruleset so that it can be executed by <a href="../modules/lace.engine.html#run">lace.engine.run</a>
+ later.  If you provide content then it is compiled using the source name as
+ the name used in error messages.  If you do not supply any content then Lace
+ will construct an implicit include of the given source name.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">ctx</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         Compilation context
+        </li>
+        <li><span class="parameter">src</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         Source name
+        </li>
+        <li><span class="parameter">cnt</span>
+            <span class="types">optional <a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         Source contents (nil to cause an implicit include of
+ <em>src</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+        Compiled Lace ruleset
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2022-07-20 13:26:50 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
