@@ -1,3 +1,7 @@
+[![Luacheck](https://github.com/lunarmodules/lua-lace/workflows/Luacheck/badge.svg)](https://github.com/lunarmodules/lua-lace/actions)
+[![Tests](https://img.shields.io/github/workflow/status/lunarmodules/lua-lace/Test?label=Unix%20build&logo=linux)](https://github.com/lunarmodules/lua-lace/actions)
+[![Coveralls code coverage](https://img.shields.io/coveralls/github/lunarmodules/lua-lace?logo=coveralls)](https://coveralls.io/github/lunarmodules/lua-lace)
+
 Lua Access Control Engine - Lace
 ================================
 
