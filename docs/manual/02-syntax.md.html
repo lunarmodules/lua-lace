@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Lace - Lua Access Control Engine</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>Lua Access Control Engine</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+
+
+<h2>Manual</h2>
+<ul class="nowrap">
+  <li><a href="../manual/01-index.md.html">1. Lua Access Control Engine</a></li>
+  <li><strong>2. Syntax</strong></li>
+  <li><a href="../manual/02.1-syntax-define.md.html">2.1 Definition statements</a></li>
+  <li><a href="../manual/02.2-syntax-include.md.html">2.2 Include statements</a></li>
+  <li><a href="../manual/02.3-syntax-allow-deny.md.html">2.3 Allow and Deny statements</a></li>
+  <li><a href="../manual/02.4-syntax-default.md.html">2.4 The default statement</a></li>
+  <li><a href="../manual/03-compilation.md.html">3. Compilation</a></li>
+  <li><a href="../manual/04-execution.md.html">4. Execution</a></li>
+  <li><a href="../manual/05-developing.md.html">Helping with Development</a></li>
+  <li><a href="../manual/README.md.html">README</a></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/lace.html">lace</a></li>
+  <li><a href="../modules/lace.builtin.html">lace.builtin</a></li>
+  <li><a href="../modules/lace.compiler.html">lace.compiler</a></li>
+  <li><a href="../modules/lace.engine.html">lace.engine</a></li>
+  <li><a href="../modules/lace.error.html">lace.error</a></li>
+  <li><a href="../modules/lace.lex.html">lace.lex</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+
+<h2>2. Syntax</h2>
+
+
+<p>Lace rule files are parsed line-by-line.  There is no provision at
+this time for rules to be split across multiple lines.  If you require
+such, please <a href="../manual/05-developing.md.html#">submit a patch</a>.</p>
+
+<p>Lace splits each line into a series of tokens.  Tokens are always
+strings and they can be optionally quoted to allow for spaces in them.
+Certain tokens then have constraints placed on them so that further
+parsing will be unambiguous.</p>
+
+<p>The lexing into tokens is done similarly to how shell does it.  This
+means that each whitespace-separated "word" is then subjected to
+quoting rules.  Lace does not have many special characters.  The
+backslash introduces escaped values in all cases and lace does not
+differentiate between single and double quotes.  Backslash escaped
+characters sometimes have special meaning if inside quotes.  For
+example, the following strings lex in the following ways:</p>
+
+<ol>
+    <li>Two tokens, one of each word.</li>
+</ol>
+
+
+<pre>
+hello world
+</pre>
+
+<p>2. The same as 1.</p>
+
+
+<pre>
+hello   world
+</pre>
+
+<p>3. One token with both words separated by one space</p>
+
+
+<pre>
+<span class="string">"hello world"</span>
+</pre>
+
+<p>4. Same as 3.</p>
+
+
+<pre>
+<span class="string">'hello world'</span>
+</pre>
+
+<p>5. Same as 3 and 4.</p>
+
+
+<pre>
+hello\ world
+</pre>
+
+<p>6. One token, consisting of the letters: <code>uptown</code></p>
+
+
+<pre>
+up\town
+</pre>
+
+<p>6. One token, consisting of the letters: <code>up TAB own</code></p>
+
+
+<pre>
+<span class="string">"up\town"</span>
+</pre>
+
+<p>7. One token, a double-quote character</p>
+
+
+<pre>
+\"
+</pre>
+
+<p>8. The same as 7</p>
+
+
+<pre>
+<span class="string">'"'</span>
+</pre>
+
+<p>9. The same as 7 and 8.</p>
+
+
+<pre>
+<span class="string">"\""</span>
+</pre>
+
+<p>As you can see, the lexing rules are not trivial, but should not come
+as a surprise to anyone used to standard command-line lexing
+techniques.</p>
+
+<p>Comments in Lace are prefixed by a hash '#', a double-slash '//' or a
+double-dash '--'.  The first word of the line must start with one of
+these markers (but may contain other text also), for example:</p>
+
+
+<pre>
+# This is a comment
+// As is this
+<span class="comment">-- And this
+</span>
+#But also this
+//And this
+<span class="comment">--And also this</span>
+</pre>
+
+<p>Blank lines are permitted and ignored (except for counting), any
+prefixed or postfixed whitespace is deleted before lexing begins.  As
+such:</p>
+
+
+<pre>
+# This is a comment
+  # So is this
+</pre>
+
+<p>This allows for sub-rulesets to be indented as the author pleases,
+without altering the meaning of the rules.</p>
+
+<p>The first word of a rule defines its type.  You can think of it as the
+command being run.  Lace, by default, provides a small number of rule
+types:</p>
+
+<ol>
+    <li><p><a href="../manual/02.1-syntax-define.md.html#">Definitions</a>:
+    This define access control stanzas.  The definitions produced are
+    used in further rules to control access.  Lace does not allow any
+    name to be reused.</p></li>
+    <li><p><a href="../manual/02.2-syntax-include.md.html#">Includes</a>:
+    Lace can include further rules at any point during a ruleset.  If
+    the rules are to be optionally run then Lace cannot perform static
+    analysis of the definitions within the ruleset.  Instead it will
+    rely on runtime catching of multiple-definitions etc.</p></li>
+    <li><p><a href="../manual/02.3-syntax-allow-deny.md.html#">Access control statements</a>:
+    These are the core functions of Lace.  Namely the allow and deny
+    statements.  These use control definitions from earlier in a ruleset
+    to determine whether to allow or deny access.  The first allow
+    or deny statement which passes will stop execution of the ruleset.</p></li>
+    <li><p><a href="../manual/02.4-syntax-default.md.html#">Default statement</a>:
+    The 'default' statement can only be run once and provides Lace with
+    information on what to do in the case of no allow or deny rule passing.</p></li>
+</ol>
+
+<p>In those files, if you encounter the words WILL, MAY, SHOULD, MUST, or
+their negatives, specifically in all-caps, then the meaning of the
+words is taken in the spirit of the RFC usage of them.</p>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2022-07-22 12:53:02 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

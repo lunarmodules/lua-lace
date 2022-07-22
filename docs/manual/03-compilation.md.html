@@ -1,0 +1,291 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Lace - Lua Access Control Engine</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>Lua Access Control Engine</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+
+
+<h2>Manual</h2>
+<ul class="nowrap">
+  <li><a href="../manual/01-index.md.html">1. Lua Access Control Engine</a></li>
+  <li><a href="../manual/02-syntax.md.html">2. Syntax</a></li>
+  <li><a href="../manual/02.1-syntax-define.md.html">2.1 Definition statements</a></li>
+  <li><a href="../manual/02.2-syntax-include.md.html">2.2 Include statements</a></li>
+  <li><a href="../manual/02.3-syntax-allow-deny.md.html">2.3 Allow and Deny statements</a></li>
+  <li><a href="../manual/02.4-syntax-default.md.html">2.4 The default statement</a></li>
+  <li><strong>3. Compilation</strong></li>
+  <li><a href="../manual/04-execution.md.html">4. Execution</a></li>
+  <li><a href="../manual/05-developing.md.html">Helping with Development</a></li>
+  <li><a href="../manual/README.md.html">README</a></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/lace.html">lace</a></li>
+  <li><a href="../modules/lace.builtin.html">lace.builtin</a></li>
+  <li><a href="../modules/lace.compiler.html">lace.compiler</a></li>
+  <li><a href="../modules/lace.engine.html">lace.engine</a></li>
+  <li><a href="../modules/lace.error.html">lace.error</a></li>
+  <li><a href="../modules/lace.lex.html">lace.lex</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+
+<h2>3. Compilation</h2>
+
+<p>When you construct a Lace engine, you give it a compilation callback
+set.  That set is used to call you back when Lace encounters something it
+needs help compiling.  The structure of it is:</p>
+
+
+<pre>
+{ _lace = {
+   loader = <span class="keyword">function</span>(compcontext, nametoload) ... <span class="keyword">end</span>,
+   commands = {
+      ... = <span class="keyword">function</span>(compcontext, words...) ... <span class="keyword">end</span>,
+   },
+   controltype = {
+      ... = <span class="keyword">function</span>(compcontext, <span class="global">type</span>, words...) ... <span class="keyword">end</span>,
+   }
+} }
+</pre>
+
+<p>Anything outside of the <code>_lace</code> entry in the context is considered
+fair game structure-wise and can be used by the functions called back
+to acquire internal pointers etc.  Note however that the compilation
+context will not be passed around during execution so if you need to
+remember some of it in order to function properly, then it's up to
+you.  Also note that anything not defined above in the <code>_lace</code> example
+is considered "private" to Lace and should not be touched by non-Lace
+code.</p>
+
+<p>In addition, Lace will maintain a <code>source</code> entry in the _lace table
+with the lexed source which is being compiled and, if we're compiling
+an included source, a parent entry with the compilation context of the
+parent.  The toplevel field is the compilation context of the top
+level compilation.  If parent is nil, then toplevel will equal
+compcontext.  Lace also maintains a <code>linenr</code> entry with the
+currently-being-compiled line number, so that commands and control
+types can use that in error reports if necessary.</p>
+
+<p>If <code>loader</code> is absent then the <code>include</code> statement refuses to include
+anything mandatory.  If it is present but returns nil when called then
+the <code>include</code> statement fails any mandatory includes which do so.</p>
+
+<p>Otherwise the loader is expected to return the 'real' name of the
+source and the content of it.  This allows for symbolic lookups.</p>
+
+<p>If Lace encounters a command it does not recognise then it will call
+<code>context._lace.commands[cmdname]</code> passing in the words representing the line
+in question.  It's up to that function to compile the line or else to
+return an error.</p>
+
+<p>If Lace encounters a control type during a <code>define</code> command which it
+does not understand, then it calls the <code>context._lace.controltype[name]</code>
+function passing in all the remaining arguments.  The control type
+function is expected to return a compiled set for the define or else
+an error.</p>
+
+<p>To start a Lace engine compiling a ruleset, simply do (pseudocode):</p>
+
+
+<pre>
+rules, err = lace.compiler.compile(compcontext, sourcename[, sourcecontent])
+</pre>
+
+<p>If <code>sourcecontent</code> is not given, Lace will use the loader in the
+<code>compcontext</code> to load the source.</p>
+
+<p>If <code>rules</code> is <code>nil</code>, then <code>err</code> is a Lua error.
+If <code>rules</code> is <code>false</code>, then <code>err</code> is a formatted error from compilation
+Otherwise, <code>rules</code> should be a table containing the ruleset.</p>
+
+<p>Internally, once compiled, Lace rulesets are a table of tables.  Each
+rule entry has a reference to its source and line number.  It then has
+a function pointer for executing this rule, and a set of arguments to
+give the rule.  Lace automatically passes the execution context as the
+first argument to the rule.  Sub-included rulesets are simply one of
+the arguments to the function used to run the rule.</p>
+
+<h1>Loader</h1>
+
+<p>When Lace wishes to load an entry, it calls the <code>loader</code> function.  This
+is to allow rulesets to be loadable from arbitrary locations such as
+files on disk, HTTP URLs, random bits of memory or even out of version
+control repositories directly.</p>
+
+<p>The <code>loader</code> function is given the compilation context and the name of the
+source to load.  Note that while it has the compilation context, the loader
+function must be sensitive to the case of the initial load.  Under that
+circumstance, the source information in the compilation context will be
+unavailable.  The loader function is required to fit the following pseudocode
+definition:</p>
+
+
+<pre>
+realname, content = loader(compcontext, nametoload)
+</pre>
+
+<p>If <code>realname</code> is not a string then content is expected to be an
+"internal" error message (see below) which will be augmented with the
+calling source position etc and rendered into an error to return to
+the caller of <code>lace.compiler.compile()</code>.</p>
+
+<p>If <code>realname</code> is a string then it is taken to be the real name of the
+loaded content (at worst you should return nametoload here) and
+<code>content</code> is a string representing the contents of that file.</p>
+
+<p>Once it has been loaded by the <code>loader</code> function, Lace will compile that
+sub-ruleset before continuing with the current ruleset.</p>
+
+<h1>Commands</h1>
+
+<p>When Lace wishes to compile a command for which it has no internal
+definition, it will call the command function provided in the
+compilation context.  If no such command function is found, it will
+produce an error and stop the compilation.</p>
+
+<p>The command functions must fit the following pseudocode definition:</p>
+
+
+<pre>
+cmdtab, msg = command_func(compcontext, words...)
+</pre>
+
+<p>If <code>cmdtab</code> is not a table, msg should be an "internal" error message
+(see below) which will be augmented with the calling source position
+etc and rendered into an error to return to the caller of
+<code>lace.compiler.compile()</code>.</p>
+
+<p>If <code>cmdtab</code> is a table, it is taken to be the compiled table
+representing the command to run at ruleset execution time.  It should
+have the form:</p>
+
+
+<pre>
+{ fn = exec_function, args = {...} }
+</pre>
+
+<p>Lace will automatically augment that with the source information which
+led to the compiled rule for use later.</p>
+
+<p>The <code>exec_function</code> is expected to fit the following pseudocode
+definition:</p>
+
+
+<pre>
+result, msg = exec_function(exec_context, <span class="global">unpack</span>(args))
+</pre>
+
+<p>See <a href="../manual/04-execution.md.html#">execution</a> for notes on how these <code>exec_function</code>
+functions are meant to behave.</p>
+
+<h1>Control Types</h1>
+
+<p>When Lace is compiling a definition rule with a control type it has
+not got internally, Lace will call the controltype function associated
+with it (or report an error if no such control type is found).</p>
+
+<p>The control type functions must fit the following pseudocode
+definition:</p>
+
+
+<pre>
+ctrltab, msg = controltype_func(compcontext, <span class="global">type</span>, words...)
+</pre>
+
+<p>If <code>ctrltab</code> is not a table, msg should be an "internal" error message
+(see below) which will be augmented with the calling source position
+etc and rendered into an error to return to the caller of
+<code>lace.compiler.compile()</code>.</p>
+
+<p>If <code>ctrltab</code> is a table, it is taken to be the compiled table
+representing the control type to run at ruleset execution time.  It
+should have the form:</p>
+
+
+<pre>
+{ fn = ct_function, args = {...} }
+</pre>
+
+<p>The <code>ct_function</code> is expected to fit the following pseudocode
+definition:</p>
+
+
+<pre>
+result, msg = ct_function(exec_context, <span class="global">unpack</span>(args))
+</pre>
+
+<p>See <a href="../manual/04-execution.md.html#">execution</a> for notes on how these <code>ct_function</code> functions
+are meant to behave.</p>
+
+<h1>Compiler internal errors</h1>
+
+<p>Error messages during compilation are generated by calling:</p>
+
+
+<pre>
+<span class="keyword">return</span> lace.<span class="global">error</span>.<span class="global">error</span>(<span class="string">"my message"</span>, { x, y })
+</pre>
+
+<p>Where the table is a list of numeric indices of the words which caused the
+error.  If words is empty (or nil) then the error is considered to be the
+entire line.</p>
+
+<p>Lace will use this information to construct meaningful long error
+messages which point at the words in question.  Such as:</p>
+
+
+<pre>
+Unknown command name: <span class="string">'go_fish'</span>
+myruleset :: <span class="number">6</span>
+go_fish <span class="string">"I have no bananas"</span>
+^^^^^^^
+</pre>
+
+<p>In the case of control type compilation, the words will automatically be offset
+by the appropriate number to account for the define words.  This means you
+should always 1-index from your arguments where index 1 is the control type
+word index.</p>
+
+<p>The same kind of situation occurs during <a href="../manual/04-execution.md.html#">execution</a>.</p>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2022-07-22 12:53:02 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

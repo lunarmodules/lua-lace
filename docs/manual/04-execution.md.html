@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Lace - Lua Access Control Engine</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>Lua Access Control Engine</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+
+
+<h2>Manual</h2>
+<ul class="nowrap">
+  <li><a href="../manual/01-index.md.html">1. Lua Access Control Engine</a></li>
+  <li><a href="../manual/02-syntax.md.html">2. Syntax</a></li>
+  <li><a href="../manual/02.1-syntax-define.md.html">2.1 Definition statements</a></li>
+  <li><a href="../manual/02.2-syntax-include.md.html">2.2 Include statements</a></li>
+  <li><a href="../manual/02.3-syntax-allow-deny.md.html">2.3 Allow and Deny statements</a></li>
+  <li><a href="../manual/02.4-syntax-default.md.html">2.4 The default statement</a></li>
+  <li><a href="../manual/03-compilation.md.html">3. Compilation</a></li>
+  <li><strong>4. Execution</strong></li>
+  <li><a href="../manual/05-developing.md.html">Helping with Development</a></li>
+  <li><a href="../manual/README.md.html">README</a></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/lace.html">lace</a></li>
+  <li><a href="../modules/lace.builtin.html">lace.builtin</a></li>
+  <li><a href="../modules/lace.compiler.html">lace.compiler</a></li>
+  <li><a href="../modules/lace.engine.html">lace.engine</a></li>
+  <li><a href="../modules/lace.error.html">lace.error</a></li>
+  <li><a href="../modules/lace.lex.html">lace.lex</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+
+<h2>4. Execution</h2>
+
+<p>Once compiled, a ruleset is essentially a sequence of functions to call on the
+execution context.  The simplest execution context is an empty table.  If Lace
+is going to store anything it will use a <code>_lace</code> prefix as with <a href="../manual/03-compilation.md.html#">compilation</a>
+contexts.  As with compilation, the caller is not permitted to put anything
+inside <code>_lace</code> nor to rely on its layout.</p>
+
+<p>A few important functions make up the execution engine.  The top level
+function is simply:</p>
+
+
+<pre>
+result, msg = lace.engine.run(ruleset, exec_context)
+</pre>
+
+<p>This will run <code>ruleset</code> with the given execution context and return
+a simple result.</p>
+
+<p>If <code>result</code> is <code>nil</code>, then <code>msg</code> is a long-form string error explaining
+what went wrong.  It represents a Lua error being caught and as such
+you may not want to report it to your users.</p>
+
+<p>If <code>result</code> is <code>false</code>, then <code>msg</code> is a long-form string error
+explaining that something returned an error during execution which it
+would be reasonable to report to users under most circumstances.</p>
+
+<p>If <code>result</code> is <code>&quot;allow&quot;</code>, then <code>msg</code> is an optional string saying why
+the ruleset resulted in an allow.  Ditto for <code>&quot;deny&quot;</code>.  Essentially any
+string might be a reason.  This is covered below in Commands.</p>
+
+<h1>Commands</h1>
+
+<p>When a command is being run, it is called as:</p>
+
+
+<pre>
+result, msg = command_fn(exec_context, <span class="global">unpack</span>(args))
+</pre>
+
+<p>where <code>args</code> are the arguments returned during the compilation of the command.</p>
+
+<p>If the function throws an error, that will be caught and processed by
+the execution engine.</p>
+
+<p>If <code>result</code> is falsehood (<code>nil</code>, <code>false</code>) then the command is considered to
+have failed for some reason and <code>msg</code> contains an "internal" error
+message to report to the user.  This aborts the execution of the
+ruleset.</p>
+
+<p>If <code>result</code> is <code>true</code>, then the command successfully ran, and execution
+continues at the next rule.</p>
+
+<p>If <code>result</code> is a string, then the command returned a result.  This
+ceases execution of the ruleset and the result and message (which must
+be a string explanation) are returned to the caller.  Typically such
+results would be "allow" or "deny" although there's nothing forcing
+that to be the case.</p>
+
+<h1>Control Types</h1>
+
+<p>When a control type function is being run, it is called as:</p>
+
+
+<pre>
+result, msg = ct_fn(exec_context, <span class="global">unpack</span>(args))
+</pre>
+
+<p>where <code>args</code> are the arguments returned when the definition was compiled.</p>
+
+<p>If the function throws an error, it will be caught and processed by
+the execution engine.</p>
+
+<p>If <code>result</code> is <code>nil</code> then msg is an "internal" error, execution will be
+stopped and the issue reported to the caller.</p>
+
+<p>If <code>result</code> is <code>false</code>, the control call failed and returned falsehood.
+Anything else and the control call succeeded and returns truth.</p>
+
+<p>Control type functions are called at the point of test, not at the
+point of definition.  Control type results are <em>NOT</em> cached.  It is up
+to the called functions to perform any caching/memoising of results as
+needed to ensure suitably performant behaviour.</p>
+
+<h1>Helper functions</h1>
+
+<p>Since sometimes when writing command functions, you need to know if a given
+define rule passes, Lace provides a function to do this.  It is bound up in the
+behaviour of Lace's internal <code>define</code> command and as such, you should treat it
+as a black box.</p>
+
+
+<pre>
+result, msg = lace.engine.test(exec_context, name)
+</pre>
+
+<p>This, via the magic of the execution context calls through to the
+appropriate control type functions, returning their results directly.</p>
+
+<p>This means that it can throw an error in the case of a Lua error,
+otherwise it returns the two values as detailed above.</p>
+
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2022-07-22 12:53:02 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
