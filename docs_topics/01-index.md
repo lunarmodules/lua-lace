@@ -1,5 +1,4 @@
-Lace - Lua Access Control Engine
-================================
+## 1. Lua Access Control Engine
 
 Lace is the core of an access control engine designed to be embedded into other
 applications.  It is also designed to be extended by the very applications it
@@ -17,9 +16,10 @@ augment that provided in the application specific documentation.
 
 The Lace codebase provides an example of using the library which should be
 referred to for getting started with Lace.  However, there is also extensive
-documentation on the [[syntax]] of Lace rulesets and also on the
-[[compilation]] and [[execution]] phases of access control.
+documentation on the @{02-syntax.md|syntax} of Lace rulesets and also on the
+@{03-compilation.md|compilation} and @{04-execution.md|execution} phases of
+access control.
 
-If you wish to assist with Lace development, then see the [[developing]]
+If you wish to assist with Lace development, then see the @{05-developing.md|developing}
 document for pointers around the codebase and the test suite.
 

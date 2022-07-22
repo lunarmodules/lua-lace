@@ -1,5 +1,5 @@
-Lace - Helping with Development
-===============================
+## Helping with Development
+
 
 The Lace codebase is divided up in to directories:
 
