@@ -32,54 +32,58 @@
 
 
 
-<h2>Modules</h2>
-<ul class="nowrap">
-  <li><strong>lace</strong></li>
-  <li><a href="../modules/lace.builtin.html">lace.builtin</a></li>
-  <li><a href="../modules/lace.compiler.html">lace.compiler</a></li>
-  <li><a href="../modules/lace.engine.html">lace.engine</a></li>
-  <li><a href="../modules/lace.error.html">lace.error</a></li>
-  <li><a href="../modules/lace.lex.html">lace.lex</a></li>
-</ul>
 <h2>Manual</h2>
 <ul class="nowrap">
   <li><a href="../manual/01-index.md.html">1. Lua Access Control Engine</a></li>
   <li><a href="../manual/02-syntax.md.html">2. Syntax</a></li>
   <li><a href="../manual/02.1-syntax-define.md.html">2.1 Definition statements</a></li>
   <li><a href="../manual/02.2-syntax-include.md.html">2.2 Include statements</a></li>
-  <li><a href="../manual/02.3-syntax-allow-deny.md.html">2.3 Allow and Deny statements</a></li>
+  <li><strong>2.3 Allow and Deny statements</strong></li>
   <li><a href="../manual/02.4-syntax-default.md.html">2.4 The default statement</a></li>
   <li><a href="../manual/03-compilation.md.html">3. Compilation</a></li>
   <li><a href="../manual/04-execution.md.html">4. Execution</a></li>
   <li><a href="../manual/05-developing.md.html">Helping with Development</a></li>
   <li><a href="../manual/README.md.html">README</a></li>
 </ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/lace.html">lace</a></li>
+  <li><a href="../modules/lace.builtin.html">lace.builtin</a></li>
+  <li><a href="../modules/lace.compiler.html">lace.compiler</a></li>
+  <li><a href="../modules/lace.engine.html">lace.engine</a></li>
+  <li><a href="../modules/lace.error.html">lace.error</a></li>
+  <li><a href="../modules/lace.lex.html">lace.lex</a></li>
+</ul>
 
 </div>
 
 <div id="content">
 
-<h1>Module <code>lace</code></h1>
-<p>Lua Access Control Engine.</p>
-<p>
+
+<h3>2.3 Allow and Deny statements</h3>
+
+<p>These access control statements start <code>allow</code> or <code>deny</code>, followed by a single
+token reason to be returned to the caller (thus the reason should be quoted if
+it contains spaces), followed by zero or more definition names, all of which
+must pass for the statement to execute.</p>
+
+<p>For example:</p>
 
 
-<p> The Lua Access Control Engine library consists primarily of a ruleset
- compiler and execution engine.  In addition there is a lexer and also a
- complex error reporting system designed to ensure application authors who
- use Lace in their projects can provide good error messages to their users.</p>
+<pre>
+allow <span class="string">"Administrators can do anything"</span> is-admin
+deny <span class="string">"Plebs may do nothing"</span> is-pleb
 
-<ul>
-    <li>For compiling rulesets, see <a href="../modules/lace.compiler.html#compile">lace.compiler.compile</a>.</li>
-    <li>For running compiled rulesets, see <a href="../modules/lace.engine.html#run">lace.engine.run</a>.</li>
-</ul>
-</p>
+allow <span class="string">''</span>
+</pre>
 
+<p>As with definitions, includes, etc, if rule names are prefixed with an
+exclamation point then their sense is inverted, e.g.</p>
 
 
-<br/>
-<br/>
-
+<pre>
+deny <span class="string">"Only admins may alter hooks"</span> altering-hooks !is-admin
+</pre>
 
 
 
