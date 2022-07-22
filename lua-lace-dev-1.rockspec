@@ -13,7 +13,7 @@ control types and then Lace runs the boolean logic and returns an
 allow/deny result along with the location of the decision and any
 description provided by it.]],
    homepage = "https://github.com/lunarmodules/lua-lace",
-   license = "MIT"
+   license = "BSD 3-Clause"
 }
 build = {
    type = "builtin",
