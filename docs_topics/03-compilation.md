@@ -1,5 +1,4 @@
-Lace - The nitty-gritty of the compilation process
-==================================================
+## 3. Compilation
 
 When you construct a Lace engine, you give it a compilation callback
 set.  That set is used to call you back when Lace encounters something it
@@ -129,8 +128,8 @@ definition:
 
     result, msg = exec_function(exec_context, unpack(args))
 
-See [[execution]] for notes on how these `exec_function` functions are meant
-to behave.
+See @{04-execution.md|execution} for notes on how these `exec_function`
+functions are meant to behave.
 
 Control Types
 =============
@@ -160,8 +159,8 @@ definition:
 
     result, msg = ct_function(exec_context, unpack(args))
 
-See [[execution]] for notes on how these `ct_function` functions are meant
-to behave.
+See @{04-execution.md|execution} for notes on how these `ct_function` functions
+are meant to behave.
 
 Compiler internal errors
 ========================
@@ -187,4 +186,4 @@ by the appropriate number to account for the define words.  This means you
 should always 1-index from your arguments where index 1 is the control type
 word index.
 
-The same kind of situation occurs during [[execution]].
+The same kind of situation occurs during @{04-execution.md|execution}.

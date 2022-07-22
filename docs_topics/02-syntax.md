@@ -1,9 +1,9 @@
-Lace - Syntax of rulesets
-=========================
+## 2. Syntax
+
 
 Lace rule files are parsed line-by-line.  There is no provision at
 this time for rules to be split across multiple lines.  If you require
-such, please [submit a patch][developing].
+such, please @{05-developing.md|submit a patch}.
 
 Lace splits each line into a series of tokens.  Tokens are always
 strings and they can be optionally quoted to allow for spaces in them.
@@ -70,7 +70,7 @@ these markers (but may contain other text also), for example:
     # This is a comment
     // As is this
     -- And this
-    
+
     #But also this
     //And this
     --And also this
@@ -89,23 +89,26 @@ The first word of a rule defines its type.  You can think of it as the
 command being run.  Lace, by default, provides a small number of rule
 types:
 
-1. [Definitions](../syntax-define)
-   * This define access control stanzas.  The definitions produced are
-     used in further rules to control access.  Lace does not allow any
-     name to be reused.
-2. [Includes](../syntax-include)
-   * Lace can include further rules at any point during a ruleset.  If
-     the rules are to be optionally run then Lace cannot perform static
-     analysis of the definitions within the ruleset.  Instead it will
-     rely on runtime catching of multiple-definitions etc.
-3. [Access control statements](../syntax-allow-deny)
-   * These are the core functions of Lace.  Namely the allow and deny
-     statements.  These use control definitions from earlier in a ruleset
-     to determine whether to allow or deny access.  The first allow
-     or deny statement which passes will stop execution of the ruleset.
-4. [Default statement](../syntax-default)
-  * The 'default' statement can only be run once and provides Lace with
-    information on what to do in the case of no allow or deny rule passing.
+1. @{02.1-syntax-define.md|Definitions}:
+This define access control stanzas.  The definitions produced are
+used in further rules to control access.  Lace does not allow any
+name to be reused.
+
+2. @{02.2-syntax-include.md|Includes}:
+Lace can include further rules at any point during a ruleset.  If
+the rules are to be optionally run then Lace cannot perform static
+analysis of the definitions within the ruleset.  Instead it will
+rely on runtime catching of multiple-definitions etc.
+
+3. @{02.3-syntax-allow-deny.md|Access control statements}:
+These are the core functions of Lace.  Namely the allow and deny
+statements.  These use control definitions from earlier in a ruleset
+to determine whether to allow or deny access.  The first allow
+or deny statement which passes will stop execution of the ruleset.
+
+4. @{02.4-syntax-default.md|Default statement}:
+The 'default' statement can only be run once and provides Lace with
+information on what to do in the case of no allow or deny rule passing.
 
 In those files, if you encounter the words WILL, MAY, SHOULD, MUST, or
 their negatives, specifically in all-caps, then the meaning of the
